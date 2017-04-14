@@ -5,11 +5,11 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-@Entity // This tells Hibernate to make a table out of this class
+@Entity 
 public class Worker {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     private String name;
     
@@ -19,15 +19,26 @@ public class Worker {
     
     private String address;
     
-    private long telephone_number;
+    private String telephone_number;
     
-    private boolean position;
+    private String position;
+    
+    protected Worker() {}
 
-	public Integer getId() {
+	public Worker(String name, String surname, String email, String address, String telephone_number, String position) {
+		this.name = name;
+		this.surname = surname;
+		this.email = email;
+		this.address = address;
+		this.telephone_number = telephone_number;
+		this.position = position;
+	}
+
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -63,21 +74,26 @@ public class Worker {
 		this.address = adOdress;
 	}
 
-	public long getTelephone_number() {
+	public String getTelephone_number() {
 		return telephone_number;
 	}
 
-	public void setTelephone_number(long telephone_number) {
+	public void setTelephone_number(String telephone_number) {
 		this.telephone_number = telephone_number;
 	}
 
-	public boolean isPosition() {
+	public String getPosition() {
 		return position;
 	}
 
-	public void setPosition(boolean position) {
+	public void setPosition(String position) {
 		this.position = position;
 	}
 
+	@Override
+	public String toString() {
+		return String.format("Worker[id=%d, name='%s', surname='%s', email='%s', address='%s', telephone_number='%s', position='%s' ]",
+				id, name, surname, email, address, telephone_number, position);
+	}
 
 }
