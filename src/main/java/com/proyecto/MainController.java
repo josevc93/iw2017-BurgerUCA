@@ -58,7 +58,7 @@ public class MainController extends UI {
 			editor.editWorker(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editWorker(new Worker("", "", "", "","","")));
+		addNewBtn.addClickListener(e -> editor.editWorker(new Worker("", "", "", "","","", "")));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);

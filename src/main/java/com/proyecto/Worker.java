@@ -23,15 +23,19 @@ public class Worker {
     
     private String position;
     
+    private String urlAvatar;
+    
     protected Worker() {}
 
-	public Worker(String name, String surname, String email, String address, String telephone_number, String position) {
+	public Worker(String name, String surname, String email, String address, 
+					String telephone_number, String position, String urlAvatar) {
 		this.name = name;
 		this.surname = surname;
 		this.email = email;
 		this.address = address;
 		this.telephone_number = telephone_number;
 		this.position = position;
+		this.urlAvatar = urlAvatar;
 	}
 
 	public Long getId() {
@@ -89,11 +93,19 @@ public class Worker {
 	public void setPosition(String position) {
 		this.position = position;
 	}
+	
+	public void setUrlAvatar(String urlAvatar){
+		this.urlAvatar = urlAvatar;
+	}
+	
+	public String getUrlAvatar(){
+		return urlAvatar;
+	}
 
 	@Override
 	public String toString() {
-		return String.format("Worker[id=%d, name='%s', surname='%s', email='%s', address='%s', telephone_number='%s', position='%s' ]",
-				id, name, surname, email, address, telephone_number, position);
+		return String.format("Worker[id=%d, name='%s', surname='%s', email='%s', address='%s', telephone_number='%s', position='%s', urlAvatar='%s' ]",
+				id, name, surname, email, address, telephone_number, position, urlAvatar);
 	}
 
 }

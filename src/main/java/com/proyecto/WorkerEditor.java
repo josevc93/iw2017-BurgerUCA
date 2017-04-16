@@ -1,32 +1,47 @@
 package com.proyecto;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+
+import javax.swing.JOptionPane;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.server.FileResource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.ui.Upload;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 
+
+@SuppressWarnings("serial")
 @SpringComponent
 @UIScope
-public class WorkerEditor extends VerticalLayout {
-
+public class WorkerEditor extends VerticalLayout{
+	
 	private final WorkerRepository repository;
 
 	private Worker worker;
-
+	
 	TextField name = new TextField("Nombre");
 	TextField surname = new TextField("Apellido");
 	TextField email = new TextField("Email");
 	TextField address = new TextField("Dirección");
 	TextField telephone_number = new TextField("Numero");
 	TextField position = new TextField("Cargo");
+	TextField urlAvatar = new TextField();
 	
 	Button save = new Button("Guardar");
 	Button cancel = new Button("Cancelar");
@@ -35,11 +50,45 @@ public class WorkerEditor extends VerticalLayout {
 	
 	Binder<Worker> binder = new Binder<>(Worker.class);
 	
-	@Autowired
 	public WorkerEditor(WorkerRepository repository) {
-		this.repository = repository;
 		
-		addComponents(name, surname, email, address, telephone_number, position, actions);
+		this.repository = repository;
+		final Image image = new Image();
+		
+		class ImageUploader implements Receiver, SucceededListener {
+			public File file;
+			
+			public OutputStream receiveUpload(String filename, String mimeType){
+				FileOutputStream fos = null;
+				try{
+					file = new File("src/img/"+filename);
+					System.out.println("Nombre fichero "+file);
+					fos = new FileOutputStream(file);
+				}catch(final java.io.FileNotFoundException e){
+					JOptionPane.showMessageDialog(null, "Error al subir el fichero");
+					 /*Notification.show("No se pudo abrir el fichero", 
+									Notification.Type.ERROR_MESSAGE);*/
+					return null;
+				}
+				return fos;
+			}
+	
+			public void uploadSucceeded(SucceededEvent event) {
+				System.out.println("Fichero subido correctamente");
+				image.setVisible(true);
+				image.setSource(new FileResource(file));
+				image.setWidth(200, Unit.PIXELS);
+				image.setHeight(200, Unit.PIXELS);
+				urlAvatar.setVisible(false);
+				urlAvatar.setValue(file.toString());
+			}
+		};
+		ImageUploader receiver = new ImageUploader();
+		Upload upload = new Upload("Upload it here", receiver);
+		upload.setImmediateMode(false);
+		upload.addSucceededListener(receiver);
+		
+		addComponents(name, surname, email, address, telephone_number, position, upload, image, actions, urlAvatar);
 		
 		binder.bindInstanceFields(this);
 		
@@ -53,7 +102,8 @@ public class WorkerEditor extends VerticalLayout {
 		cancel.addClickListener(e -> editWorker(worker));
 		setVisible(false);
 	}
-
+	
+	
 	public interface ChangeHandler {
 
 		void onChange();
@@ -87,5 +137,4 @@ public class WorkerEditor extends VerticalLayout {
 		save.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());
 	}
-
 }
