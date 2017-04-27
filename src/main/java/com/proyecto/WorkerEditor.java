@@ -25,7 +25,6 @@ import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 
-
 @SuppressWarnings("serial")
 @SpringComponent
 @UIScope
@@ -55,14 +54,15 @@ public class WorkerEditor extends VerticalLayout{
 		this.repository = repository;
 		final Image image = new Image();
 		
+		
 		class ImageUploader implements Receiver, SucceededListener {
-			public File file;
 			
+			public File file;
 			public OutputStream receiveUpload(String filename, String mimeType){
 				FileOutputStream fos = null;
 				try{
 					file = new File("src/img/"+filename);
-					System.out.println("Nombre fichero "+file);
+					//System.out.println("Nombre fichero "+file);
 					fos = new FileOutputStream(file);
 				}catch(final java.io.FileNotFoundException e){
 					JOptionPane.showMessageDialog(null, "Error al subir el fichero");
@@ -79,7 +79,6 @@ public class WorkerEditor extends VerticalLayout{
 				image.setSource(new FileResource(file));
 				image.setWidth(200, Unit.PIXELS);
 				image.setHeight(200, Unit.PIXELS);
-				urlAvatar.setVisible(false);
 				urlAvatar.setValue(file.toString());
 			}
 		};
@@ -87,6 +86,12 @@ public class WorkerEditor extends VerticalLayout{
 		Upload upload = new Upload("Upload it here", receiver);
 		upload.setImmediateMode(false);
 		upload.addSucceededListener(receiver);
+		urlAvatar.setVisible(false);
+		//if(file != null){
+		//	image.setVisible(true);+
+		//	file = new File("src/img/Bart_Simpson_200px.png");
+		//	image.setSource(new FileResource(file));
+		//}
 		
 		addComponents(name, surname, email, address, telephone_number, position, upload, image, actions, urlAvatar);
 		

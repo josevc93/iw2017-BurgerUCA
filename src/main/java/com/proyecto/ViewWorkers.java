@@ -2,25 +2,30 @@ package com.proyecto;
 
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import com.proyecto.Worker;
-import com.proyecto.WorkerRepository;
-import com.vaadin.server.VaadinRequest;
+import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ValueChangeMode;
-import com.vaadin.spring.annotation.SpringUI;
+import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 
-@SpringUI
-public class MainController extends UI {
+@SuppressWarnings("serial")
+@SpringView(name = ViewWorkers.VIEW_NAME)
+public class ViewWorkers extends VerticalLayout implements View {
+    public static final String VIEW_NAME = "trabajadores";
 
-	private final WorkerRepository repo;
+    private final WorkerRepository repo;
 
 	private final WorkerEditor editor;
 
@@ -31,20 +36,19 @@ public class MainController extends UI {
 	private final Button addNewBtn;
 
 	@Autowired
-	
-	public MainController(WorkerRepository repo,  WorkerEditor editor){
+	public ViewWorkers(WorkerRepository repo,  WorkerEditor editor){
 		this.editor = editor;
 		this.repo = repo;
 		this.grid = new Grid<>(Worker.class);
 		this.filter = new TextField();
 		this.addNewBtn = new Button("Nuevo trabajador");
 	}
-
-	@Override
-	protected void init(VaadinRequest request) {
-		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
+    
+    @PostConstruct
+    void init() {
+        HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
 		VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
-		setContent(mainLayout);
+		addComponent(mainLayout);
 
 		grid.setHeight(300, Unit.PIXELS);
 		grid.setColumns("name", "surname", "email");
@@ -66,9 +70,9 @@ public class MainController extends UI {
 		});
 
 		listWorkers(null);
-	}
+    }
 
-	void listWorkers(String filterText) {
+    void listWorkers(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
 			grid.setItems((Collection<Worker>) repo.findAll());
 		}
@@ -76,4 +80,10 @@ public class MainController extends UI {
 			grid.setItems(repo.findBySurnameStartsWithIgnoreCase(filterText));
 		}
 	}
+    
+	@Override
+    public void enter(ViewChangeEvent event) {
+        // This view is constructed in the init() method()
+    }
+
 }
