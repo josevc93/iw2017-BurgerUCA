@@ -30,12 +30,13 @@ public class MyUI extends UI implements ViewDisplay {
 
     @Override
     protected void init(VaadinRequest request) {
-        final VerticalLayout root = new VerticalLayout();
+        final HorizontalLayout root = new HorizontalLayout();
         root.setSizeFull();
         setContent(root);
 
         final CssLayout navigationBar = new CssLayout();
-        navigationBar.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+        navigationBar.addStyleName(ValoTheme.LAYOUT_HORIZONTAL_WRAPPING);
+        navigationBar.setWidth("200px");
         navigationBar.addComponent(createNavigationButton("Gestión Pedidos",  ViewOrder.VIEW_NAME));
         navigationBar.addComponent(createNavigationButton("Administración", ViewAdmin.VIEW_NAME));
         navigationBar.addComponent(createNavigationButton("Gestión Pedidos",  ViewOrder.VIEW_NAME));
@@ -53,6 +54,7 @@ public class MyUI extends UI implements ViewDisplay {
     private Button createNavigationButton(String caption, final String viewName) {
         Button button = new Button(caption);
         button.addStyleName(ValoTheme.BUTTON_PRIMARY);
+        button.setWidth("100%");
         // If you didn't choose Java 8 when creating the project, convert this
         // to an anonymous listener class
         button.addClickListener(event -> getUI().getNavigator().navigateTo(viewName));
