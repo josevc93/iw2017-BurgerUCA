@@ -4,12 +4,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity 
 public class Worker {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
+    
+    @ManyToOne
+    private Restaurant restaurant;
 
     private String name;
     
@@ -106,6 +110,14 @@ public class Worker {
 	public String toString() {
 		return String.format("Worker[id=%d, name='%s', surname='%s', email='%s', address='%s', telephone_number='%s', position='%s', urlAvatar='%s' ]",
 				id, name, surname, email, address, telephone_number, position, urlAvatar);
+	}
+
+	public Restaurant getRestaurant() {
+		return restaurant;
+	}
+
+	public void setRestaurant(Restaurant restaurant) {
+		this.restaurant = restaurant;
 	}
 
 }

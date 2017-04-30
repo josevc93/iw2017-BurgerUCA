@@ -11,18 +11,16 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.spring.annotation.ViewScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-@SpringView(name = ViewWorkers.VIEW_NAME)
-public class ViewWorkers extends VerticalLayout implements View {
+@SpringView(name = WorkerView.VIEW_NAME)
+public class WorkerView extends VerticalLayout implements View {
     public static final String VIEW_NAME = "trabajadores";
 
     private final WorkerRepository repo;
@@ -36,21 +34,22 @@ public class ViewWorkers extends VerticalLayout implements View {
 	private final Button addNewBtn;
 
 	@Autowired
-	public ViewWorkers(WorkerRepository repo,  WorkerEditor editor){
+	public WorkerView(WorkerRepository repo,  WorkerEditor editor){
 		this.editor = editor;
 		this.repo = repo;
 		this.grid = new Grid<>(Worker.class);
 		this.filter = new TextField();
 		this.addNewBtn = new Button("Nuevo trabajador");
+		addNewBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
 	}
     
     @PostConstruct
     void init() {
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
-		VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
-		addComponent(mainLayout);
+        HorizontalLayout mainLayout = new HorizontalLayout(actions, grid, editor);
+        VerticalLayout all = new VerticalLayout(actions, mainLayout);
+		addComponent(all);
 
-		grid.setHeight(300, Unit.PIXELS);
 		grid.setColumns("name", "surname", "email");
 
 		filter.setPlaceholder("Filtrar por apellido");

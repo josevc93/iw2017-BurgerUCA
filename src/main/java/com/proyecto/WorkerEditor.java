@@ -3,13 +3,12 @@ package com.proyecto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.swing.JOptionPane;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.vaadin.data.Binder;
-import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.FileResource;
 import com.vaadin.spring.annotation.SpringComponent;
@@ -42,6 +41,7 @@ public class WorkerEditor extends VerticalLayout{
 	TextField position = new TextField("Cargo");
 	TextField urlAvatar = new TextField();
 	
+
 	Button save = new Button("Guardar");
 	Button cancel = new Button("Cancelar");
 	Button delete = new Button("Eliminar");
@@ -87,12 +87,7 @@ public class WorkerEditor extends VerticalLayout{
 		upload.setImmediateMode(false);
 		upload.addSucceededListener(receiver);
 		urlAvatar.setVisible(false);
-		//if(file != null){
-		//	image.setVisible(true);+
-		//	file = new File("src/img/Bart_Simpson_200px.png");
-		//	image.setSource(new FileResource(file));
-		//}
-		
+
 		addComponents(name, surname, email, address, telephone_number, position, upload, image, actions, urlAvatar);
 		
 		binder.bindInstanceFields(this);
