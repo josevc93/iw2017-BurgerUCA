@@ -13,7 +13,7 @@ public class Product {
 		this.price = price;
 		this.iva = iva;
 		this.family = family;
-		this.image = image;
+		this.productImage = image;
 	}
 
 	@Id
@@ -28,7 +28,7 @@ public class Product {
     
     private String family;
     
-    private String image;
+    private String productImage;
 
     protected Product() {}
 
@@ -85,6 +85,14 @@ public class Product {
 	public String toString() {
 		return "Product [id=" + id + ", name=" + name + ", price=" + price + ", iva=" + iva + ", family=" + family
 				+ "]";
+	}
+
+	public String getProductImage() {
+		return productImage;
+	}
+
+	public void setProductImage(String productImage) {
+		this.productImage = productImage;
 	}
 
 	

@@ -21,28 +21,28 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-@SpringView(name = RestaurantView.VIEW_NAME)
-public class RestaurantView extends VerticalLayout implements View {
-    public static final String VIEW_NAME = "restaurantes";
+@SpringView(name = MenuView.VIEW_NAME)
+public class MenuView extends VerticalLayout implements View {
+    public static final String VIEW_NAME = "menus";
 
-    private final RestaurantRepository repo;
+    private final MenuRepository repo;
 
-	private final RestaurantEditor editor;
+	private final MenuEditor editor;
 	
-	final Grid<Restaurant> grid;
+	final Grid<Menu> grid;
 
 	final TextField filter;
 
 	private final Button addNewBtn;
-	
 
 	@Autowired
-	public RestaurantView(RestaurantRepository repo, RestaurantEditor editor){
+	public MenuView(MenuRepository repo, MenuEditor editor){
 		this.editor = editor;
 		this.repo = repo;
-		this.grid = new Grid<>(Restaurant.class);
+		
+		this.grid = new Grid<>(Menu.class);
 		this.filter = new TextField();
-		this.addNewBtn = new Button("Nuevo restaurante");
+		this.addNewBtn = new Button("Nuevo menu");
 		addNewBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
 	}
     
@@ -53,31 +53,31 @@ public class RestaurantView extends VerticalLayout implements View {
         VerticalLayout all = new VerticalLayout(actions, mainLayout);
 		addComponent(all);
 
-		grid.setColumns("name", "address");
+		grid.setColumns("name", "price");
 
 		filter.setPlaceholder("Filtrar por nombre");
 
 		filter.setValueChangeMode(ValueChangeMode.LAZY);
-		filter.addValueChangeListener(e -> listRestaurants(e.getValue()));
+		filter.addValueChangeListener(e -> listmenus(e.getValue()));
 
 		grid.asSingleSelect().addValueChangeListener(e -> {
-			editor.editRestaurant(e.getValue());
+			editor.editMenu(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editRestaurant(new Restaurant("", "")));
+		addNewBtn.addClickListener(e -> editor.editMenu(new Menu("", "")));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
-			listRestaurants(filter.getValue());
+			listmenus(filter.getValue());
 		});
 
-		listRestaurants(null);
+		listmenus(null);
 		
     }
 
-    void listRestaurants(String filterText) {
+    void listmenus(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
-			grid.setItems((Collection<Restaurant>) repo.findAll());
+			grid.setItems((Collection<Menu>) repo.findAll());
 		}
 		else {
 			grid.setItems(repo.findByNameStartsWithIgnoreCase(filterText));

@@ -3,9 +3,9 @@ package com.proyecto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+//import java.util.List;
+//import java.util.stream.Collectors;
+//import java.util.stream.IntStream;
 
 import javax.swing.JOptionPane;
 import com.vaadin.data.Binder;

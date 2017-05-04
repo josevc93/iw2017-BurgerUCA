@@ -35,6 +35,8 @@ public class MyUI extends UI implements ViewDisplay {
         navigationBar.addComponent(createNavigationButton("Administración", AdminView.VIEW_NAME));
         navigationBar.addComponent(createNavigationButton("Trabajadores", WorkerView.VIEW_NAME));
         navigationBar.addComponent(createNavigationButton("Restaurantes", RestaurantView.VIEW_NAME));
+        navigationBar.addComponent(createNavigationButton("Productos", ProductView.VIEW_NAME));
+        navigationBar.addComponent(createNavigationButton("Menus", MenuView.VIEW_NAME));
         navigationBar.addComponent(createNavigationButton("Login", LoginView.VIEW_NAME));
         root.addComponent(navigationBar);
         
