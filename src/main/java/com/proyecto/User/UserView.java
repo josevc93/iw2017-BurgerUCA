@@ -1,6 +1,5 @@
-package com.proyecto;
+package com.proyecto.User;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.annotation.PostConstruct;
@@ -15,34 +14,35 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-@SuppressWarnings("serial")
-@SpringView(name = MenuView.VIEW_NAME)
-public class MenuView extends VerticalLayout implements View {
-    public static final String VIEW_NAME = "menus";
+//@SuppressWarnings("serial")
+//@Theme("valo")
+@SpringView(name = UserView.VIEW_NAME)
+public class UserView extends VerticalLayout implements View {
+    public static final String VIEW_NAME = "userView";
 
-    private final MenuRepository repo;
+    //private final UserRepository repo;
 
-	private final MenuEditor editor;
-	
-	final Grid<Menu> grid;
+	private final UserEditor editor;
+
+	final Grid<User> grid;
 
 	final TextField filter;
 
 	private final Button addNewBtn;
 
+	private final UserService service;
+	
 	@Autowired
-	public MenuView(MenuRepository repo, MenuEditor editor){
+	public UserView(UserService service,  UserEditor editor){
 		this.editor = editor;
-		this.repo = repo;
-		
-		this.grid = new Grid<>(Menu.class);
+		this.service = service;
+		this.grid = new Grid<>(User.class);
 		this.filter = new TextField();
-		this.addNewBtn = new Button("Nuevo menu");
+		this.addNewBtn = new Button("Nuevo trabajador");
 		addNewBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
 	}
     
@@ -53,34 +53,33 @@ public class MenuView extends VerticalLayout implements View {
         VerticalLayout all = new VerticalLayout(actions, mainLayout);
 		addComponent(all);
 
-		grid.setColumns("name", "price");
+		grid.setColumns("firstName", "lastName", "email", "position");
 
-		filter.setPlaceholder("Filtrar por nombre");
+		filter.setPlaceholder("Filtrar por apellido");
 
 		filter.setValueChangeMode(ValueChangeMode.LAZY);
-		filter.addValueChangeListener(e -> listmenus(e.getValue()));
+		filter.addValueChangeListener(e -> listWorkers(e.getValue()));
 
 		grid.asSingleSelect().addValueChangeListener(e -> {
-			editor.editMenu(e.getValue());
+			editor.editUser(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editMenu(new Menu("", "")));
+		addNewBtn.addClickListener(e -> editor.editUser(new User("", "", "", "", "", "", "", "")));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
-			listmenus(filter.getValue());
+			listWorkers(filter.getValue());
 		});
 
-		listmenus(null);
-		
+		listWorkers(null);
     }
 
-    void listmenus(String filterText) {
+    void listWorkers(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
-			grid.setItems((Collection<Menu>) repo.findAll());
+			grid.setItems((Collection<User>) service.findAll());
 		}
 		else {
-			grid.setItems(repo.findByNameStartsWithIgnoreCase(filterText));
+			grid.setItems(service.findByLastNameStartsWithIgnoreCase(filterText));
 		}
 	}
     
