@@ -69,6 +69,7 @@ public class LoginScreen extends VerticalLayout {
             password.setValue("");
             if (!callback.login(username.getValue(), pword)) {
                 Notification.show("Usuario o contraseña incorrectos!");
+                
                 username.focus();
             }
         });

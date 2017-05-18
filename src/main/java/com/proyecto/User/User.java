@@ -12,6 +12,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+//import org.springframework.security.core.GrantedAuthority;
+//import org.springframework.security.core.authority.SimpleGrantedAuthority;
+//import org.springframework.security.core.userdetails.UserDetails;
+
 
 
 @Entity 
@@ -76,10 +80,9 @@ public class User implements UserDetails{
 		this.lastName = lastName;
 	}
 
-	public void setUsername(String username) {
-		this.username= username;
+	public void setUserame(String username) {
+		this.username = username;
 	}
-	
 	
 	public void setPassword(String password) {
 		this.password = password;
@@ -171,7 +174,7 @@ public class User implements UserDetails{
 	@Override
 	public String getUsername() {
 		// TODO Auto-generated method stub
-		return null;
+		return username;
 	}
 
 }

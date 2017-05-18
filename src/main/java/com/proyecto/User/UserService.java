@@ -30,7 +30,9 @@ public class UserService implements UserDetailsService {
 	}
 
 	public User save(User user) {
-		user.setPassword(passwordEncoder.encode(user.getPassword() != null ? user.getPassword() : "default"));
+		if(user.getPassword() == null){
+			user.setPassword(passwordEncoder.encode(user.getPassword() != null ? user.getPassword() : "default"));
+		}
 		return repo.save(user);
 	}
 
