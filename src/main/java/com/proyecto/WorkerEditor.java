@@ -1,5 +1,4 @@
-package com.proyecto.User;
-
+package com.proyecto;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -7,7 +6,9 @@ import java.io.OutputStream;
 //import java.util.List;
 //import java.util.stream.Collectors;
 //import java.util.stream.IntStream;
-import com.proyecto.*;
+import java.util.ArrayList;
+import java.util.Collection;
+
 import javax.swing.JOptionPane;
 import com.vaadin.data.Binder;
 import com.vaadin.event.ShortcutAction;
@@ -17,9 +18,13 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
+
+import antlr.collections.List;
+
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
@@ -28,20 +33,22 @@ import com.vaadin.ui.Upload.SucceededListener;
 @SuppressWarnings("serial")
 @SpringComponent
 @UIScope
-public class UserEditor extends VerticalLayout{
+public class WorkerEditor extends VerticalLayout{
 	
-	private final UserService service;
+	private final WorkerRepository repository;
+	
+	private final RestaurantRepository repositoryRes;
 
-	private User user;
+	private Worker worker;
 	
-	TextField firstName = new TextField("Nombre");
-	TextField lastName = new TextField("Apellido");
-	TextField userName = new TextField("Nombre de usuario");
+	TextField name = new TextField("Nombre");
+	TextField surname = new TextField("Apellido");
 	TextField email = new TextField("Email");
 	TextField address = new TextField("Dirección");
 	TextField telephone_number = new TextField("Numero");
 	TextField position = new TextField("Cargo");
 	TextField urlAvatar = new TextField();
+	NativeSelect<String> restaurantSelect;
 	
 
 	Button save = new Button("Guardar");
@@ -49,11 +56,14 @@ public class UserEditor extends VerticalLayout{
 	Button delete = new Button("Eliminar");
 	CssLayout actions = new CssLayout(save, cancel, delete);
 	
-	Binder<User> binder = new Binder<>(User.class);
+	Binder<Worker> binder = new Binder<>(Worker.class);
 	
-	public UserEditor(UserService service) {
+	public WorkerEditor(WorkerRepository repository, RestaurantRepository repositoryRes) {
 		
-		this.service = service;
+		this.repository = repository;
+		
+		this.repositoryRes = repositoryRes;
+		
 		final Image image = new Image();
 		
 		
@@ -89,8 +99,17 @@ public class UserEditor extends VerticalLayout{
 		upload.setImmediateMode(false);
 		upload.addSucceededListener(receiver);
 		urlAvatar.setVisible(false);
+		
+		Collection<Restaurant> restaurants = repositoryRes.findAll();
+		ArrayList<String> restaurantList = new ArrayList<>();
+		for(Restaurant r: restaurants)
+			restaurantList.add(r.getName());
+		
+		restaurantSelect = new NativeSelect<>("Selecciona restaurante", restaurantList);
+		restaurantSelect.setEmptySelectionAllowed(false);
 
-		addComponents(firstName, lastName, userName , email, address, telephone_number, position, upload, image, actions, urlAvatar);
+		addComponents(name, surname, email, address, telephone_number, position, restaurantSelect,
+					upload, image, actions, urlAvatar);
 		
 		binder.bindInstanceFields(this);
 		
@@ -99,9 +118,9 @@ public class UserEditor extends VerticalLayout{
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 		
-		save.addClickListener(e -> service.save(user));
-		delete.addClickListener(e -> service.delete(user));
-		cancel.addClickListener(e -> editUser(user));
+		save.addClickListener(e -> repository.save(worker));
+		delete.addClickListener(e -> repository.delete(worker));
+		cancel.addClickListener(e -> editWorker(worker));
 		setVisible(false);
 	}
 	
@@ -111,26 +130,26 @@ public class UserEditor extends VerticalLayout{
 		void onChange();
 	}
 
-	public final void editUser(User c) {
+	public final void editWorker(Worker c) {
 		if (c == null) {
 			setVisible(false);
 			return;
 		}
 		final boolean persisted = c.getId() != null;
 		if (persisted) {
-			user = service.findOne(c.getId());
+			worker = repository.findOne(c.getId());
 		}
 		else {
-			user = c;
+			worker = c;
 		}
 		cancel.setVisible(persisted);
 
-		binder.setBean(user);
+		binder.setBean(worker);
 
 		setVisible(true);
 
 		save.focus();
-		firstName.selectAll();
+		name.selectAll();
 	}
 
 	public void setChangeHandler(ChangeHandler h) {

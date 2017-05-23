@@ -1,7 +1,8 @@
 package com.proyecto;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -64,7 +65,8 @@ public class RestaurantView extends VerticalLayout implements View {
 			editor.editRestaurant(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editRestaurant(new Restaurant("", "")));
+		Set<Zona> s = new HashSet<Zona>();
+		addNewBtn.addClickListener(e -> editor.editRestaurant(new Restaurant("", "", s)));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);

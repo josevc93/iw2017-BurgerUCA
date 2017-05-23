@@ -1,4 +1,4 @@
-package com.proyecto.User;
+package com.proyecto;
 
 import java.util.Collection;
 
@@ -18,29 +18,26 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-//@SuppressWarnings("serial")
-//@Theme("valo")
-@SpringView(name = UserView.VIEW_NAME)
-public class UserView extends VerticalLayout implements View {
-    public static final String VIEW_NAME = "userView";
+@SuppressWarnings("serial")
+@SpringView(name = WorkerView.VIEW_NAME)
+public class WorkerView extends VerticalLayout implements View {
+    public static final String VIEW_NAME = "trabajadores";
 
-    //private final UserRepository repo;
+    private final WorkerRepository repo;
 
-	private final UserEditor editor;
+	private final WorkerEditor editor;
 
-	final Grid<User> grid;
+	final Grid<Worker> grid;
 
 	final TextField filter;
 
 	private final Button addNewBtn;
 
-	private final UserService service;
-	
 	@Autowired
-	public UserView(UserService service,  UserEditor editor){
+	public WorkerView(WorkerRepository repo,  WorkerEditor editor){
 		this.editor = editor;
-		this.service = service;
-		this.grid = new Grid<>(User.class);
+		this.repo = repo;
+		this.grid = new Grid<>(Worker.class);
 		this.filter = new TextField();
 		this.addNewBtn = new Button("Nuevo trabajador");
 		addNewBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -53,7 +50,7 @@ public class UserView extends VerticalLayout implements View {
         VerticalLayout all = new VerticalLayout(actions, mainLayout);
 		addComponent(all);
 
-		grid.setColumns("firstName", "lastName", "email", "position");
+		grid.setColumns("name", "surname", "email");
 
 		filter.setPlaceholder("Filtrar por apellido");
 
@@ -61,10 +58,11 @@ public class UserView extends VerticalLayout implements View {
 		filter.addValueChangeListener(e -> listWorkers(e.getValue()));
 
 		grid.asSingleSelect().addValueChangeListener(e -> {
-			editor.editUser(e.getValue());
+			editor.editWorker(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editUser(new User("", "", "", "", "", "", "", "")));
+		Restaurant r = new Restaurant();
+		addNewBtn.addClickListener(e -> editor.editWorker(new Worker("", "", "", "","","", "", r)));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
@@ -76,10 +74,10 @@ public class UserView extends VerticalLayout implements View {
 
     void listWorkers(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
-			grid.setItems((Collection<User>) service.findAll());
+			grid.setItems((Collection<Worker>) repo.findAll());
 		}
 		else {
-			grid.setItems(service.findByLastNameStartsWithIgnoreCase(filterText));
+			grid.setItems(repo.findBySurnameStartsWithIgnoreCase(filterText));
 		}
 	}
     

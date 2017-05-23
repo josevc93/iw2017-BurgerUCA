@@ -1,19 +1,23 @@
 package com.proyecto;
 
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 @Entity 
 public class Product {
-    public Product(String name, String price, String iva, String family, String image) {
+    public Product(String name, String price, String iva, String family, String image, List<ProductMenu> productMenuList) {
 		super();
 		this.name = name;
 		this.price = price;
 		this.iva = iva;
 		this.family = family;
 		this.productImage = image;
+		this.productMenuList = productMenuList;
 	}
 
 	@Id
@@ -29,6 +33,9 @@ public class Product {
     private String family;
     
     private String productImage;
+    
+    @OneToMany(mappedBy = "productObj")
+    private List<ProductMenu> productMenuList;
 
     protected Product() {}
 
@@ -93,6 +100,14 @@ public class Product {
 
 	public void setProductImage(String productImage) {
 		this.productImage = productImage;
+	}
+
+	public List<ProductMenu> getProductMenuList() {
+		return productMenuList;
+	}
+
+	public void setProductMenuList(List<ProductMenu> productMenuList) {
+		this.productMenuList = productMenuList;
 	}
 
 	

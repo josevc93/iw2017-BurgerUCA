@@ -9,6 +9,4 @@ import com.proyecto.Menu;
 
 public interface MenuRepository extends JpaRepository<Menu, Long> {
 	List<Menu> findByNameStartsWithIgnoreCase(String name);
-	//@Query("select * from menu")
-	//List<Menu> listadoMenus();
 }

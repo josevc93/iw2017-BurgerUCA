@@ -1,6 +1,8 @@
 package com.proyecto;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -14,32 +16,34 @@ import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
-@SpringView(name = ProductView.VIEW_NAME)
-public class ProductView extends VerticalLayout implements View {
-    public static final String VIEW_NAME = "productos";
+@SpringView(name = ZonaView.VIEW_NAME)
+public class ZonaView extends VerticalLayout implements View {
+    public static final String VIEW_NAME = "zonas";
 
-    private final ProductRepository repo;
+    private final ZonaRepository repo;
 
-	private final ProductEditor editor;
+	private final ZonaEditor editor;
 	
-	final Grid<Product> grid;
+	final Grid<Zona> grid;
 
 	final TextField filter;
 
 	private final Button addNewBtn;
+	
 
 	@Autowired
-	public ProductView(ProductRepository repo, ProductEditor editor){
+	public ZonaView(ZonaRepository repo, ZonaEditor editor){
 		this.editor = editor;
 		this.repo = repo;
-		this.grid = new Grid<>(Product.class);
+		this.grid = new Grid<>(Zona.class);
 		this.filter = new TextField();
-		this.addNewBtn = new Button("Nuevo Producto");
+		this.addNewBtn = new Button("Nueva Zona");
 		addNewBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
 	}
     
@@ -50,30 +54,31 @@ public class ProductView extends VerticalLayout implements View {
         VerticalLayout all = new VerticalLayout(actions, mainLayout);
 		addComponent(all);
 
-		grid.setColumns("name", "price", "family");
-
+		grid.setColumns("name", "numMesas","state");
+		
 		filter.setPlaceholder("Filtrar por nombre");
 
 		filter.setValueChangeMode(ValueChangeMode.LAZY);
-		filter.addValueChangeListener(e -> listProducts(e.getValue()));
+		filter.addValueChangeListener(e -> listZonas(e.getValue()));
 
 		grid.asSingleSelect().addValueChangeListener(e -> {
-			editor.editProduct(e.getValue());
+			editor.editZona(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editProduct(new Product("", "", "", "", "", null)));
+		addNewBtn.addClickListener(e -> editor.editZona(new Zona("", 0L, false)));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
-			listProducts(filter.getValue());
+			listZonas(filter.getValue());
 		});
 
-		listProducts(null);
+		listZonas(null);
+		
     }
 
-    void listProducts(String filterText) {
+    void listZonas(String filterText) {
 		if (StringUtils.isEmpty(filterText)) {
-			grid.setItems((Collection<Product>) repo.findAll());
+			grid.setItems((Collection<Zona>) repo.findAll());
 		}
 		else {
 			grid.setItems(repo.findByNameStartsWithIgnoreCase(filterText));
@@ -83,6 +88,7 @@ public class ProductView extends VerticalLayout implements View {
 	@Override
     public void enter(ViewChangeEvent event) {
         // This view is constructed in the init() method()
+		//grid.getDataProvider().refreshAll();
     }
 
 }

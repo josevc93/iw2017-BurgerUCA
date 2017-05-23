@@ -1,26 +1,36 @@
 package com.proyecto;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity 
 public class ProductMenu {
-	public ProductMenu(Long id_menu, Long id_product) {
+	public ProductMenu(Long cantidad, Product productObj, Menu menuObj) {
 		super();
-		this.id_menu = id_menu;
-		this.id_product = id_product;
+		this.setCantidad(cantidad);
+		this.menuObj = menuObj;
+		this.productObj = productObj;
 	}
 
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     
-	private Long id_menu;
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "product_id")
+	private Product productObj;
 	
-	private Long id_product;
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name = "menu_id")
+	private Menu menuObj;
 
+	private Long cantidad;
+	
     protected ProductMenu() {}
     
     public Long get_id(){
@@ -31,21 +41,27 @@ public class ProductMenu {
     	this.id = id;
     }
 
-	public Long getId_menu() {
-		return id_menu;
+	public Long getCantidad() {
+		return cantidad;
 	}
 
-	public void setId_menu(Long id_menu) {
-		this.id_menu = id_menu;
+	public void setCantidad(Long cantidad) {
+		this.cantidad = cantidad;
 	}
 
-	public Long getId_product() {
-		return id_product;
+	public Product getProductObj() {
+		return productObj;
 	}
 
-	public void setId_product(Long id_product) {
-		this.id_product = id_product;
+	public void setProductObj(Product productObj) {
+		this.productObj = productObj;
 	}
 
-	
+	public Menu getMenuObj() {
+		return menuObj;
+	}
+
+	public void setMenuObj(Menu menuObj) {
+		this.menuObj = menuObj;
+	}	
 }

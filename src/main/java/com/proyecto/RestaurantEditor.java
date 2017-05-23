@@ -1,11 +1,15 @@
 package com.proyecto;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import com.vaadin.data.Binder;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -16,6 +20,8 @@ import com.vaadin.ui.themes.ValoTheme;
 public class RestaurantEditor extends VerticalLayout{
 	
 	private final RestaurantRepository repository;
+	
+	private final ZonaRepository repositoryZ;
 
 	private Restaurant restaurant;
 	
@@ -27,13 +33,26 @@ public class RestaurantEditor extends VerticalLayout{
 	Button delete = new Button("Eliminar");
 	CssLayout actions = new CssLayout(save, cancel, delete);
 	
+	private final ListSelect<String> selectZonas = new ListSelect<>("Zonas");
+	
 	Binder<Restaurant> binder = new Binder<>(Restaurant.class);
 	
-	public RestaurantEditor(RestaurantRepository repository) {
+	public RestaurantEditor(RestaurantRepository repository, ZonaRepository repositoryZ) {
 		
 		this.repository = repository;
 		
-		addComponents(name, address, actions);
+		this.repositoryZ = repositoryZ;
+		
+		Collection<Zona> zonas = repositoryZ.findAll();
+		ArrayList<String> listaAct = new ArrayList<String>();
+		for (Zona z : zonas) {
+			//System.out.println(z.getName());
+		    listaAct.add(z.getName());
+		}
+		
+		selectZonas.setItems(listaAct);
+		
+		addComponents(name, address, selectZonas, actions);
 		binder.bindInstanceFields(this);
 		setSpacing(true);
 		actions.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
@@ -51,6 +70,10 @@ public class RestaurantEditor extends VerticalLayout{
 		void onChange();
 	}
 
+	public final void listarZonas(){
+		
+	}
+	
 	public final void editRestaurant(Restaurant r) {
 		if (r == null) {
 			setVisible(false);
