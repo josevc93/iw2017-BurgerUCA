@@ -23,7 +23,7 @@ import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
-import antlr.collections.List;
+import java.util.List;
 
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.Upload.Receiver;
@@ -118,12 +118,18 @@ public class WorkerEditor extends VerticalLayout{
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 		
-		save.addClickListener(e -> repository.save(worker));
+		save.addClickListener(e -> insertarTrabajador(worker));
 		delete.addClickListener(e -> repository.delete(worker));
 		cancel.addClickListener(e -> editWorker(worker));
 		setVisible(false);
 	}
 	
+	public final void insertarTrabajador(Worker w){
+		String cad = restaurantSelect.getValue().toString();
+		List<Restaurant> restaurant = repositoryRes.findByNameStartsWithIgnoreCase(cad);
+		w.setRestaurant(restaurant.get(0)); 
+		repository.save(w);
+	}
 	
 	public interface ChangeHandler {
 
