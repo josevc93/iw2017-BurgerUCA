@@ -7,8 +7,10 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.proyecto.security.SecurityUtils;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
+import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Grid;
@@ -47,6 +49,8 @@ public class OrderPView extends VerticalLayout implements View {
 		
     @PostConstruct
     void init() {
+    	addComponent(new Label("Nombre del usuario: " + SecurityUtils.getUserLogin()));
+    	addComponent(new Label("Trabaja en: " + SecurityUtils.getUserRestaurant()));
         //addComponent(new Label("Bienvenido a la gestión de pedidos."));
     	HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
