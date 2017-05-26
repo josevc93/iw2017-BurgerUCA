@@ -68,6 +68,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		navigationBar.setWidth("200px");
 		navigationBar.addComponent(createNavigationButton("Trabajadores", UserView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Restaurantes", RestaurantView.VIEW_NAME));
+		navigationBar.addComponent(createNavigationButton("Zonas", ZonaView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Productos", ProductView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Menus", MenuView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Gestión Pedidos", OrderView.VIEW_NAME));
@@ -94,7 +95,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 
 	public void checkAuthorities() {
 		System.out.println("Checking security");
-		for(int i = 0; i < 4; i++){
+		for(int i = 0; i < 5; i++){
 			navigationBar.getComponent(i).setVisible(SecurityUtils.hasRole("Gerente"));
 		}
 		

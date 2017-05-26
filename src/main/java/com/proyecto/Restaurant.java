@@ -8,6 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.proyecto.User.User;
+
 @Entity 
 public class Restaurant {
     @Id
@@ -21,15 +23,14 @@ public class Restaurant {
     @OneToMany(targetEntity=Zona.class)
     private Set<Zona> zonasList;
     
-    @OneToMany( targetEntity=Worker.class )
-    private Set<Worker> workersList;
+    @OneToMany( targetEntity=User.class )
+    private Set<User> usersList;
     
-    protected Restaurant() {}
+    public Restaurant() {}
 
-	public Restaurant(String name, String address, Set<Zona> zonasList) {
+	public Restaurant(String name, String address) {
 		this.name = name;
 		this.address = address;
-		this.zonasList = zonasList;
 	}
 
 	@Override
@@ -60,7 +61,7 @@ public class Restaurant {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
+	
 	public Set<Zona> getZonasList() {
 		return zonasList;
 	}
@@ -69,11 +70,12 @@ public class Restaurant {
 		this.zonasList = zonasList;
 	}
 
-	public Set<Worker> getWorkersList() {
-		return workersList;
+	public Set<User> getUsersList() {
+		return usersList;
 	}
 
-	public void setWorkersList(Set<Worker> workersList) {
-		this.workersList = workersList;
+	public void setUsersList(Set<User> usersList) {
+		this.usersList = usersList;
 	}
+
 }
