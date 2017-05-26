@@ -13,16 +13,18 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import com.proyecto.User.User;
+
 @Entity 
 public class OrderP {
 
-	public OrderP(boolean state, boolean takeAway, Long numMesa, Worker worker, Customer customer,
+	public OrderP(boolean state, boolean takeAway, Long numMesa, User user, Customer customer,
 			Long coste, List<OrderLineProduct> orderLineProductList, List<OrderLineMenu> orderLineMenuList) {
 		super();
 		this.state = state;
 		this.takeAway = takeAway;
 		this.numMesa = numMesa;
-		this.worker = worker;
+		this.user = user;
 		this.customer = customer;
 		this.coste = coste;
 		this.orderLineProductList = orderLineProductList;
@@ -49,7 +51,7 @@ public class OrderP {
     
     @ManyToOne (fetch=FetchType.LAZY)
     @JoinColumn(name="worker_ID")
-    private Worker worker;
+    private User user;
     
     @ManyToOne (fetch=FetchType.LAZY)
     @JoinColumn(name="customer_ID")
@@ -85,12 +87,12 @@ public class OrderP {
 		this.numMesa = numMesa;
 	}
 
-	public Worker getWorker() {
-		return worker;
+	public User getUser() {
+		return user;
 	}
 
-	public void setWorker(Worker worker) {
-		this.worker = worker;
+	public void setWorker(User user) {
+		this.user = user;
 	}
 
 	public Customer getCustomer() {

@@ -11,11 +11,11 @@ import com.vaadin.ui.VerticalLayout;
 @SuppressWarnings("serial")
 @SpringView(name = DefaultView.VIEW_NAME)
 public class DefaultView extends VerticalLayout implements View {
-    public static final String VIEW_NAME = "";
+    public static final String VIEW_NAME = "defaultView";
 
     @PostConstruct
     void init() {
-        addComponent(new Label("Aquí debe de ir el Login"));
+        addComponent(new Label("Bienvenido a BurguerUca"));
     }
 
     @Override

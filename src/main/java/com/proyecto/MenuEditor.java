@@ -14,6 +14,7 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
@@ -74,9 +75,12 @@ public class MenuEditor extends VerticalLayout{
 			lista.add(p.getName());
 		
 		//select.setItems(lista);
-		productSelect = new NativeSelect<>("Selecciona restaurante", lista);
+		productSelect = new NativeSelect<>("Selecciona producto", lista);
 		
-		addComponents(name, price, actionsProducts, productSelect, productCantidad, actions);
+		HorizontalLayout h = new HorizontalLayout(productSelect, productCantidad, newProduct); 
+		VerticalLayout actionsProducts = new VerticalLayout(h, gridProdAct, deleteProduct);
+		
+		addComponents(name, price, actionsProducts, actions);
 		
 		binder.bindInstanceFields(this);
 		

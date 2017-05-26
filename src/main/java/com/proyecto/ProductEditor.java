@@ -50,7 +50,7 @@ public class ProductEditor extends VerticalLayout{
 		final Image image = new Image();
 		
 		
-class ImageUploader implements Receiver, SucceededListener {
+		class ImageUploader implements Receiver, SucceededListener {
 			public File file;
 			public OutputStream receiveUpload(String filename, String mimeType){
 				FileOutputStream fos = null;

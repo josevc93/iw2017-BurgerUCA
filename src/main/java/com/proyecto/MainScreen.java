@@ -10,11 +10,13 @@ import com.vaadin.annotations.Theme;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewDisplay;
+import com.vaadin.server.VaadinSession;
 //import com.vaadin.server.VaadinSession;
 import com.vaadin.spring.annotation.SpringViewDisplay;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.Label;
 //import com.vaadin.ui.HorizontalLayout;
 //import com.vaadin.ui.Label;
 import com.vaadin.ui.MenuBar;
@@ -48,10 +50,8 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		// setContent(root);
 
 		// Creamos la cabecera
-		// root.addComponent(new Label("This is the session: " +
-		// VaadinSession.getCurrent()));
-		// root.addComponent(new Label("This is the UI: " + this.toString()));
-		// root.addComponent();
+		root.addComponent(new Label("This is the session: " + VaadinSession.getCurrent().getClass().getName()));
+		root.addComponent(new Label("This is the UI: " + this.toString()));
 		/*
 		 * Button logoutButton = new Button("Logout", event -> logout());
 		 * logoutButton.setStyleName(ValoTheme.BUTTON_LINK);
@@ -71,7 +71,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		navigationBar.addComponent(createNavigationButton("Zonas", ZonaView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Productos", ProductView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Menus", MenuView.VIEW_NAME));
-		navigationBar.addComponent(createNavigationButton("Gestión Pedidos", OrderView.VIEW_NAME));
+		navigationBar.addComponent(createNavigationButton("Gestión Pedidos", OrderPView.VIEW_NAME));
 		// navigationBar.addComponent(createNavigationButton("Login",
 		// LoginScreen.VIEW_NAME));
 		MenuBar logoutMenu = new MenuBar();
