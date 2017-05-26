@@ -11,11 +11,11 @@ import javax.persistence.ManyToOne;
 @Entity 
 public class OrderLineProduct {
 
-	public OrderLineProduct(int cantidad, double precio, Order orderObj, Product productObj) {
+	public OrderLineProduct(int cantidad, double precio, OrderP orderpObj, Product productObj) {
 		super();
 		this.cantidad = cantidad;
 		this.precio = precio;
-		this.orderObj = orderObj;
+		this.orderpObj = orderpObj;
 		this.productObj = productObj;
 	}
 
@@ -30,8 +30,8 @@ public class OrderLineProduct {
     private double precio;
     
     @ManyToOne (fetch=FetchType.LAZY)
-    @JoinColumn(name="order_ID")
-    private Order orderObj;
+    @JoinColumn(name="orderp_ID")
+    private OrderP orderpObj;
     
     @ManyToOne (fetch=FetchType.LAZY)
     @JoinColumn(name="product_ID")
@@ -61,12 +61,12 @@ public class OrderLineProduct {
 		this.precio = precio;
 	}
 
-	public Order getOrderObj() {
-		return orderObj;
+	public OrderP getOrderPObj() {
+		return orderpObj;
 	}
 
-	public void setOrderObj(Order orderObj) {
-		this.orderObj = orderObj;
+	public void setOrderPObj(OrderP OrderPObj) {
+		this.orderpObj = OrderPObj;
 	}
 
 	public Product getProductObj() {
