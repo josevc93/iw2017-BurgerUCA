@@ -18,10 +18,11 @@ import javax.persistence.OneToMany;
 
 @Entity 
 public class Menu {
-    public Menu(String name, String price) {
+    public Menu(String name, String price, String menuImage) {
 		super();
 		this.name = name;
 		this.price = price;
+		this.menuImage = menuImage;
 	}
 
 	@Id
@@ -33,6 +34,8 @@ public class Menu {
     private String name;
     
     private String price;
+    
+    private String menuImage;
     
     @OneToMany(mappedBy = "menuObj", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProductMenu> productMenuList = new ArrayList<ProductMenu>();
@@ -72,6 +75,14 @@ public class Menu {
 
 	public void setProductMenuList(List<ProductMenu> productMenuList) {
 		this.productMenuList = productMenuList;
+	}
+
+	public String getMenuImage() {
+		return menuImage;
+	}
+
+	public void setMenuImage(String menuImage) {
+		this.menuImage = menuImage;
 	}
     
 }

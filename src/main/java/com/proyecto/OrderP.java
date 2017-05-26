@@ -18,17 +18,21 @@ import com.proyecto.User.User;
 @Entity 
 public class OrderP {
 
-	public OrderP(boolean state, boolean takeAway, Long numMesa, User user, Customer customer,
-			Long coste, List<OrderLineProduct> orderLineProductList, List<OrderLineMenu> orderLineMenuList) {
+
+	public OrderP(boolean state, boolean takeAway, Long numMesa, Long coste, Zona zona, User user, Customer customer,
+			List<OrderLineProduct> orderLineProductList, List<OrderLineMenu> orderLineMenuList,
+			List<GridTicket> gridTicketList) {
 		super();
 		this.state = state;
 		this.takeAway = takeAway;
 		this.numMesa = numMesa;
+		this.coste = coste;
+		this.zona = zona;
 		this.user = user;
 		this.customer = customer;
-		this.coste = coste;
 		this.orderLineProductList = orderLineProductList;
 		this.orderLineMenuList = orderLineMenuList;
+		GridTicketList = gridTicketList;
 	}
 
 	protected OrderP(){}
@@ -62,6 +66,9 @@ public class OrderP {
     
     @OneToMany(mappedBy = "menuObj", fetch = FetchType.LAZY)
     private List<OrderLineMenu> orderLineMenuList = new ArrayList<OrderLineMenu>();
+    
+    @OneToMany(mappedBy = "orderPObj", fetch = FetchType.LAZY)
+    private List<GridTicket> GridTicketList = new ArrayList<GridTicket>();
 
 	public Long getId() {
 		return id;
@@ -145,6 +152,18 @@ public class OrderP {
 
 	public void setTakeAway(boolean takeAway) {
 		this.takeAway = takeAway;
+	}
+
+	public List<GridTicket> getGridTicketList() {
+		return GridTicketList;
+	}
+
+	public void setGridTicketList(List<GridTicket> gridTicketList) {
+		GridTicketList = gridTicketList;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
 	}
 
 }

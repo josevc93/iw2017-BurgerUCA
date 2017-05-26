@@ -66,7 +66,7 @@ public class MenuView extends VerticalLayout implements View {
 			editor.editMenu(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editMenu(new Menu("", "")));
+		addNewBtn.addClickListener(e -> editor.editMenu(new Menu("", "", "")));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);

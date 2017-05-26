@@ -2,7 +2,6 @@ package com.proyecto;
 
 import javax.annotation.PostConstruct;
 
-//import com.proyecto.User.User;
 import com.proyecto.User.UserView;
 import com.proyecto.security.SecurityUtils;
 import com.vaadin.annotations.Theme;
@@ -71,6 +70,7 @@ public class MainScreen extends VerticalLayout implements ViewDisplay {
 		navigationBar.addComponent(createNavigationButton("Zonas", ZonaView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Productos", ProductView.VIEW_NAME));
 		navigationBar.addComponent(createNavigationButton("Menus", MenuView.VIEW_NAME));
+		//navigationBar.addComponent(createNavigationButton("Clientes", CustomerView.VIEW_NAME));;
 		navigationBar.addComponent(createNavigationButton("Gestión Pedidos", OrderPView.VIEW_NAME));
 		// navigationBar.addComponent(createNavigationButton("Login",
 		// LoginScreen.VIEW_NAME));

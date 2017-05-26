@@ -19,6 +19,7 @@ import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
 import com.vaadin.ui.ListSelect;
@@ -48,10 +49,10 @@ public class OrderPEditor extends VerticalLayout{
 	private ProductMenu productMenu;
 	private Customer customer;
 	
-	//private List<ProductMenu> pmList = new ArrayList<ProductMenu>();
-	
-	//final Grid<ProductMenu> gridProdAct = new Grid<ProductMenu>(ProductMenu.class);
 	final Grid<Customer> gridCustomer = new Grid<Customer>(Customer.class);
+	final Grid<GridTicket> gridTicket = new Grid<GridTicket>(GridTicket.class);
+	
+	private List<GridTicket> gtList = new ArrayList<GridTicket>();
 	
 	CheckBox takeAway = new CheckBox("Para llevar");
 	CheckBox state = new CheckBox("Finalizado");
@@ -63,10 +64,12 @@ public class OrderPEditor extends VerticalLayout{
 	CssLayout actions = new CssLayout(save, cancel, delete);
 	
 	TabSheet alimentos = new TabSheet();
-	HorizontalLayout comidasLayout = new HorizontalLayout();
-	HorizontalLayout bebidasLayout = new HorizontalLayout();
-	HorizontalLayout postresLayout = new HorizontalLayout();
-	HorizontalLayout menusLayout = new HorizontalLayout();
+
+	GridLayout comidasLayout = new GridLayout();
+	GridLayout bebidasLayout = new GridLayout();
+	GridLayout postresLayout = new GridLayout();
+	GridLayout menusLayout = new GridLayout();
+	
 	
 	Button addMenu = new Button("Añadir");
 	Button addProduct = new Button("Añadir");
@@ -81,11 +84,21 @@ public class OrderPEditor extends VerticalLayout{
 		this.repository = repository;
 		this.repoZona = repoZona;
 		this.repoM = repoM;
-	
+		
+		menusLayout.setColumns(5);
+	    comidasLayout.setColumns(5);
+		bebidasLayout.setColumns(5);
+		postresLayout.setColumns(5);
+			
 		gridCustomer.setColumns();
 		gridCustomer.addColumn(customer -> { return customer.getDireccion(); }).setCaption("Cliente");
 		gridCustomer.addColumn(customer -> { return customer.getTelefono(); }).setCaption("Telefono");
 		gridCustomer.setVisible(false);
+		
+		gridTicket.setColumns();
+		gridTicket.addColumn(ticket -> { return ticket.getNombre();}).setCaption("Nombre");
+		gridTicket.addColumn(ticket -> { return ticket.getCantidad(); }).setCaption("Cantidad");
+		gridTicket.addColumn(ticket -> { return ticket.getPrecio(); }).setCaption("Precio");
 		
 		//Lista de zonas existentes
 		List<Zona> zonasList = repoZona.findAll();
@@ -103,7 +116,7 @@ public class OrderPEditor extends VerticalLayout{
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			image.setSource(new FileResource(file));
-			image.addClickListener(e -> System.out.println(image.getCaption()));
+			image.addClickListener(e -> insertarProducto(image.getCaption(),orderp));
 			comidasLayout.addComponent(image);
 		}
 		alimentos.addTab(comidasLayout, "Comidas");
@@ -117,7 +130,7 @@ public class OrderPEditor extends VerticalLayout{
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			image.setSource(new FileResource(file));
-			image.addClickListener(e -> System.out.println(image.getCaption()));
+			image.addClickListener(e -> insertarProducto(image.getCaption(),orderp));
 			bebidasLayout.addComponent(image);
 		}
 		alimentos.addTab(bebidasLayout, "Bebidas");
@@ -131,7 +144,7 @@ public class OrderPEditor extends VerticalLayout{
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			image.setSource(new FileResource(file));
-			image.addClickListener(e -> System.out.println(image.getCaption()));
+			image.addClickListener(e -> insertarProducto(image.getCaption(),orderp));
 			postresLayout.addComponent(image);
 		}
 		alimentos.addTab(postresLayout, "Postres");
@@ -139,18 +152,16 @@ public class OrderPEditor extends VerticalLayout{
 		//Lista de menus existentes
 		Collection<Menu> menus = repoM.findAll();
 		for(Menu m: menus){
-			//System.out.println(p.getProductImage());
-			file = new File("lol");
+			file = new File(m.getMenuImage());
 			Image image = new Image(m.getName());
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			image.setSource(new FileResource(file));
-			//image.addClickListener(e -> { new GridTicket(m.getName(), m.get)}/*System.out.println(image.getCaption())*/);
+			image.addClickListener(e -> insertarMenu(image.getCaption(), orderp));
 			menusLayout.addComponent(image);
 		}
 		alimentos.addTab(menusLayout, "Menus");
-
-		addComponents(state, takeAway, gridCustomer, numMesa, zonasSelect, alimentos, actions);
+		addComponents(state, takeAway, gridCustomer, numMesa, zonasSelect, gridTicket, alimentos, actions);
 		
 		binder.forField(numMesa)
 		  .withNullRepresentation("")
@@ -188,6 +199,53 @@ public class OrderPEditor extends VerticalLayout{
 		/*newProduct.addClickListener(e -> insertarProducto(menu));
 		deleteProduct.addClickListener(e -> eliminarProducto(productMenu));*/
 		setVisible(false);
+	}
+	
+	
+	public final void insertarMenu(String name, OrderP orderp){
+		List<Menu> menuList = repoM.findByNameStartsWithIgnoreCase(name);
+		gtList = orderp.getGridTicketList();
+		
+		boolean existe = false;
+		int pos = 0;
+		while(!existe && pos<gtList.size()){
+			if(name == gtList.get(pos).getNombre())
+				existe = true;
+			pos++;
+		}
+		pos--;
+		
+		if(existe){
+			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
+			gtList.get(pos).setPrecio(Long.parseLong(menuList.get(0).getPrice()) * gtList.get(pos).getCantidad());
+			
+    	}else
+			gtList.add(new GridTicket(name, 1L, Long.parseLong(menuList.get(0).getPrice()), true)); 
+		
+		gridTicket.setItems(gtList);
+	}
+	
+	public final void insertarProducto(String name, OrderP orderp){
+		List<Product> productList = repoP.findByNameStartsWithIgnoreCase(name);
+		gtList = orderp.getGridTicketList();
+		
+		boolean existe = false;
+		int pos = 0;
+		while(!existe && pos<gtList.size()){
+			if(name == gtList.get(pos).getNombre())
+				existe = true;
+			pos++;
+		}
+		pos--;
+		
+		if(existe){
+			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
+			gtList.get(pos).setPrecio(Long.parseLong(productList.get(0).getPrice()) * gtList.get(pos).getCantidad());
+			
+    	}else
+			gtList.add(new GridTicket(name, 1L, Long.parseLong(productList.get(0).getPrice()), true)); 
+		
+		gridTicket.setItems(gtList);
 	}
 	
 	/*public final void guardarMenu(Menu m, ProductMenu pm){

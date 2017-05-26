@@ -1,5 +1,8 @@
 package com.proyecto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +58,8 @@ public class OrderPView extends VerticalLayout implements View {
 					.setCaption("Zona");
 		grid.addColumn(editor -> { return editor.getNumMesa(); }).setCaption("Numero mesa");
 		
-		addNewBtn.addClickListener(e -> editor.editOrderP(new OrderP(false, false, 0L, null, null, 0L, null, null)));
+		List<GridTicket> gridTicketList = new ArrayList<GridTicket>();
+		addNewBtn.addClickListener(e -> editor.editOrderP(new OrderP(false, false, 0L, 0L, null, null, null, null, null, gridTicketList)));
     }
 
 	@Override

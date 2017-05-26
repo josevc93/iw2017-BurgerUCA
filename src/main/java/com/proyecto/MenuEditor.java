@@ -1,23 +1,35 @@
 package com.proyecto;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.JOptionPane;
+
 import com.vaadin.data.Binder;
 import com.vaadin.event.ShortcutAction;
+import com.vaadin.server.FileResource;
+import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
+import com.vaadin.ui.Upload.Receiver;
+import com.vaadin.ui.Upload.SucceededEvent;
+import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Image;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
+import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -44,6 +56,7 @@ public class MenuEditor extends VerticalLayout{
 	
 	TextField name = new TextField("Nombre");
 	TextField price = new TextField("Precio");
+	TextField menuImage = new TextField("Image");
 	
 	Button save = new Button("Guardar");
 	Button cancel = new Button("Cancelar");
@@ -63,6 +76,37 @@ public class MenuEditor extends VerticalLayout{
 		this.repository = repository;
 		this.repoPM = repoPM;
 		
+		final Image image = new Image();
+		
+		class ImageUploader implements Receiver, SucceededListener {
+			public File file;
+			public OutputStream receiveUpload(String filename, String mimeType){
+				FileOutputStream fos = null;
+				try{
+					file = new File("src/img/"+filename);
+					fos = new FileOutputStream(file);
+				}catch(final java.io.FileNotFoundException e){
+					JOptionPane.showMessageDialog(null, "Error al subir el fichero");
+					return null;
+				}
+				return fos;
+			}
+	
+			public void uploadSucceeded(SucceededEvent event) {
+				System.out.println("Fichero subido correctamente");
+				image.setVisible(true);
+				image.setSource(new FileResource(file));
+				image.setWidth(200, Unit.PIXELS);
+				image.setHeight(200, Unit.PIXELS);
+				menuImage.setValue(file.toString());
+			}
+		};
+		ImageUploader receiver = new ImageUploader();
+		Upload upload = new Upload("Upload it here", receiver);
+		upload.setImmediateMode(false);
+		upload.addSucceededListener(receiver);
+		menuImage.setVisible(false);
+		
 		gridProdAct.setColumns();
 		gridProdAct.addColumn(pmList -> { return pmList.getProductObj().getName(); })
 					.setCaption("Producto");
@@ -80,7 +124,7 @@ public class MenuEditor extends VerticalLayout{
 		HorizontalLayout h = new HorizontalLayout(productSelect, productCantidad, newProduct); 
 		VerticalLayout actionsProducts = new VerticalLayout(h, gridProdAct, deleteProduct);
 		
-		addComponents(name, price, actionsProducts, actions);
+		addComponents(name, price, upload, image, actionsProducts, actions, menuImage);
 		
 		binder.bindInstanceFields(this);
 		

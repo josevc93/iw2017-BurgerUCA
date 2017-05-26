@@ -1,9 +1,12 @@
 package com.proyecto;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity 
 public class GridTicket {
@@ -27,6 +30,10 @@ public class GridTicket {
 	private Long precio;
 	
 	boolean tipo;
+	
+	 @ManyToOne (fetch=FetchType.LAZY)
+	 @JoinColumn(name="orderP_ID")
+	 private OrderP orderPObj;
 
 	public Long getId() {
 		return id;
