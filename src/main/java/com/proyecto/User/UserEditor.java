@@ -4,6 +4,10 @@ package com.proyecto.User;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 //import java.util.List;
 //import java.util.stream.Collectors;
 //import java.util.stream.IntStream;
@@ -17,6 +21,8 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.NativeSelect;
+import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -31,17 +37,21 @@ import com.vaadin.ui.Upload.SucceededListener;
 public class UserEditor extends VerticalLayout{
 	
 	private final UserService service;
+	
+	private final RestaurantRepository repositoryRes;
 
 	private User user;
 	
 	TextField firstName = new TextField("Nombre");
 	TextField lastName = new TextField("Apellido");
 	TextField userName = new TextField("Nombre de usuario");
+	PasswordField password = new PasswordField("Contraseña");
 	TextField email = new TextField("Email");
 	TextField address = new TextField("Dirección");
 	TextField telephone_number = new TextField("Numero");
 	TextField position = new TextField("Cargo");
 	TextField urlAvatar = new TextField();
+	NativeSelect<String> restaurantSelect;
 	
 
 	Button save = new Button("Guardar");
@@ -51,9 +61,11 @@ public class UserEditor extends VerticalLayout{
 	
 	Binder<User> binder = new Binder<>(User.class);
 	
-	public UserEditor(UserService service) {
+	public UserEditor(UserService service, RestaurantRepository repositoryRes) {
 		
 		this.service = service;
+		this.repositoryRes = repositoryRes;
+
 		final Image image = new Image();
 		
 		
@@ -89,8 +101,16 @@ public class UserEditor extends VerticalLayout{
 		upload.setImmediateMode(false);
 		upload.addSucceededListener(receiver);
 		urlAvatar.setVisible(false);
+		
+		Collection<Restaurant> restaurants = repositoryRes.findAll();
+		ArrayList<String> restaurantList = new ArrayList<>();
+		for(Restaurant r: restaurants)
+			restaurantList.add(r.getName());
+		
+		restaurantSelect = new NativeSelect<>("Selecciona restaurante", restaurantList);
+		restaurantSelect.setEmptySelectionAllowed(false);
 
-		addComponents(firstName, lastName, userName , email, address, telephone_number, position, upload, image, actions, urlAvatar);
+		addComponents(firstName, lastName, userName , password, email, address, telephone_number, position, restaurantSelect, upload, image, actions, urlAvatar);
 		
 		binder.bindInstanceFields(this);
 		
@@ -99,10 +119,17 @@ public class UserEditor extends VerticalLayout{
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 		
-		save.addClickListener(e -> service.save(user));
+		save.addClickListener(e -> insertarTrabajador(user));
 		delete.addClickListener(e -> service.delete(user));
 		cancel.addClickListener(e -> editUser(user));
 		setVisible(false);
+	}
+	
+	public final void insertarTrabajador(User u){
+		String cad = restaurantSelect.getValue().toString();
+		List<Restaurant> restaurant = repositoryRes.findByNameStartsWithIgnoreCase(cad);
+		u.setRestaurant(restaurant.get(0)); 
+		service.save(u);
 	}
 	
 	

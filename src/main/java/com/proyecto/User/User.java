@@ -7,10 +7,13 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.proyecto.Restaurant;
 
 
 
@@ -37,11 +40,15 @@ public class User implements UserDetails{
 	private String urlAvatar;
 	
 	private String password;
+	
+	@ManyToOne
+    private Restaurant restaurant;
 
 	protected User() {
 	}
 
-	public User(String firstName, String lastName, String username, String email, String address, String telephone_number, String position, String urlAvatar) {
+	public User(String firstName, String lastName, String username, String email, String address,
+			String telephone_number, String position, String urlAvatar, Restaurant restaurant, String password) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.username = username;
@@ -50,10 +57,12 @@ public class User implements UserDetails{
 		this.telephone_number = telephone_number;
 		this.position = position;
 		this.urlAvatar = urlAvatar;
+		this.restaurant = restaurant;
+		this.password = password;
 	}
 
 	public User(String firstName, String lastName) {
-		this(firstName,lastName,firstName, null, null, null, null, null);
+		this(firstName,lastName,firstName, null, null, null, null, null, null, null);
 	}
 
 	public Long getId() {
@@ -129,9 +138,18 @@ public class User implements UserDetails{
 		return urlAvatar;
 	}
 	
+	public Restaurant getRestaurant() {
+		return restaurant;
+	}
+
+	public void setRestaurant(Restaurant restaurant) {
+		this.restaurant = restaurant;
+	}
+	
 	@Override
 	public String toString() {
-		return String.format("User[id=%d, firstName='%s', lastName='%s', username='%s', email='%s', address='%s', telephone_number='%s', position='%s' , urlAvatar='%s', password='%s']", id,
+		return String.format("User[id=%d, firstName='%s', lastName='%s', username='%s', email='%s', address='%s',"
+				+ " telephone_number='%s', position='%s' , urlAvatar='%s', password='%s']", id,
 				firstName, lastName, username, email, address, telephone_number, position, urlAvatar, password);
 	}
 
@@ -143,8 +161,7 @@ public class User implements UserDetails{
 	*/
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		ArrayList<GrantedAuthority> list = new ArrayList<GrantedAuthority>();
-		System.out.println("positioN"+this.getPosition());
-		
+		//System.out.println("positioN"+this.getPosition());
 		list.add(new SimpleGrantedAuthority(this.getPosition()));
 		return (Collection<? extends GrantedAuthority>) list;	
 	}

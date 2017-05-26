@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
+import com.proyecto.Restaurant;
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.shared.ui.ValueChangeMode;
@@ -63,8 +64,9 @@ public class UserView extends VerticalLayout implements View {
 		grid.asSingleSelect().addValueChangeListener(e -> {
 			editor.editUser(e.getValue());
 		});
-
-		addNewBtn.addClickListener(e -> editor.editUser(new User("", "", "", "", "", "", "", "")));
+		
+		Restaurant r = new Restaurant();
+		addNewBtn.addClickListener(e -> editor.editUser(new User("", "", "", "", "", "", "", "", r, "")));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
