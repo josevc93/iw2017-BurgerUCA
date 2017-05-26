@@ -46,11 +46,13 @@ public class BurguerUcaApplication {
 				service.save(new User("Kim", "Bauer"));
 				service.save(new User("David", "Palmer"));
 				service.save(new User("Michelle", "Dessler"));*/
-				User user = new User("root", "pepe", "root1", "123", "456", "789", "Gerente", "");
+				//Restaurant restaurante1 = new Restaurant("restaurante1","cadiz");
+				//Restaurant restaurante2 = new Restaurant("restaurante1","jerez");
+				User user = new User("root", "pepe", "root1", "123", "456", "789", "Gerente", "", null, "");
 		    	user.setPassword("root");
 				service.save(user);
 				
-				User user2 = new User("admin", "antonio", "admin1", "333", "444", "555", "Camarero", "");
+				User user2 = new User("admin", "antonio", "admin1", "333", "444", "555", "Camarero", "", null, "");
 		    	user2.setPassword("pass");
 				service.save(user2);
 				
