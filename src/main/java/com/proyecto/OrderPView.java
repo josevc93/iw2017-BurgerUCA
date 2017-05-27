@@ -50,7 +50,7 @@ public class OrderPView extends VerticalLayout implements View {
     @PostConstruct
     void init() {
     	addComponent(new Label("Nombre del usuario: " + SecurityUtils.getUserLogin()));
-    	addComponent(new Label("Trabaja en: " + SecurityUtils.getUserRestaurant()));
+    //	addComponent(new Label("Trabaja en: " + SecurityUtils.getUserRestaurant()));
         //addComponent(new Label("Bienvenido a la gestión de pedidos."));
     	HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
@@ -63,7 +63,7 @@ public class OrderPView extends VerticalLayout implements View {
 		grid.addColumn(editor -> { return editor.getNumMesa(); }).setCaption("Numero mesa");
 		
 		List<GridTicket> gridTicketList = new ArrayList<GridTicket>();
-		addNewBtn.addClickListener(e -> editor.editOrderP(new OrderP(false, false, 0L, 0L, null, null, null, null, null, gridTicketList)));
+		addNewBtn.addClickListener(e -> editor.editOrderP(new OrderP(false, false, 0L, 0.0, null, null, null, null, null, gridTicketList)));
     }
 
 	@Override

@@ -11,7 +11,7 @@ import javax.persistence.ManyToOne;
 @Entity 
 public class GridTicket {
 	
-	public GridTicket(String nombre, Long cantidad, Long precio, boolean tipo) {
+	public GridTicket(String nombre, Long cantidad, Double precio, boolean tipo) {
 		super();
 		this.nombre = nombre;
 		this.cantidad = cantidad;
@@ -27,7 +27,7 @@ public class GridTicket {
 	
 	private Long cantidad;
 	
-	private Long precio;
+	private Double precio;
 	
 	boolean tipo;
 	
@@ -59,11 +59,11 @@ public class GridTicket {
 		this.cantidad = cantidad;
 	}
 
-	public Long getPrecio() {
+	public Double getPrecio() {
 		return precio;
 	}
 
-	public void setPrecio(Long precio) {
+	public void setPrecio(Double precio) {
 		this.precio = precio;
 	}
 

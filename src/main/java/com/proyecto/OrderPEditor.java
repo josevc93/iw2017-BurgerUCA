@@ -217,10 +217,10 @@ public class OrderPEditor extends VerticalLayout{
 		
 		if(existe){
 			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
-			gtList.get(pos).setPrecio(Long.parseLong(menuList.get(0).getPrice()) * gtList.get(pos).getCantidad());
+			gtList.get(pos).setPrecio(Double.parseDouble(menuList.get(0).getPrice()) * gtList.get(pos).getCantidad());
 			
     	}else
-			gtList.add(new GridTicket(name, 1L, Long.parseLong(menuList.get(0).getPrice()), true)); 
+			gtList.add(new GridTicket(name, 1L, Double.parseDouble(menuList.get(0).getPrice()), true)); 
 		
 		gridTicket.setItems(gtList);
 	}
@@ -240,10 +240,10 @@ public class OrderPEditor extends VerticalLayout{
 		
 		if(existe){
 			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
-			gtList.get(pos).setPrecio(Long.parseLong(productList.get(0).getPrice()) * gtList.get(pos).getCantidad());
+			gtList.get(pos).setPrecio(Double.parseDouble(productList.get(0).getPrice()) * gtList.get(pos).getCantidad());
 			
     	}else
-			gtList.add(new GridTicket(name, 1L, Long.parseLong(productList.get(0).getPrice()), true)); 
+			gtList.add(new GridTicket(name, 1L, Double.parseDouble(productList.get(0).getPrice()), true)); 
 		
 		gridTicket.setItems(gtList);
 	}

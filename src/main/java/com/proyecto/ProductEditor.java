@@ -3,6 +3,8 @@ package com.proyecto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
@@ -14,6 +16,8 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.JavaScript;
+import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
 import com.vaadin.ui.VerticalLayout;
@@ -34,7 +38,7 @@ public class ProductEditor extends VerticalLayout{
 	TextField name = new TextField("Nombre");
 	TextField price = new TextField("Precio");
 	TextField iva = new TextField("IVA");
-	TextField family = new TextField("Familia");
+	private final NativeSelect<String> familySelect;
 	TextField productImage = new TextField("Image");
 	
 	Button save = new Button("Guardar");
@@ -49,6 +53,11 @@ public class ProductEditor extends VerticalLayout{
 		this.repository = repository;
 		final Image image = new Image();
 		
+		ArrayList<String> lista = new ArrayList<String>();
+		lista.add("comidas");
+		lista.add("bebidas");
+		lista.add("postres");
+		familySelect = new NativeSelect<>("Selecciona producto", lista);
 		
 		class ImageUploader implements Receiver, SucceededListener {
 			public File file;
@@ -81,19 +90,78 @@ public class ProductEditor extends VerticalLayout{
 		upload.setImmediateMode(false);
 		upload.addSucceededListener(receiver);
 		productImage.setVisible(false);
-		addComponents(name, price, iva, family, upload, image, actions, productImage);
+		addComponents(name, price, iva, familySelect, upload, image, actions, productImage);
 		binder.bindInstanceFields(this);
 		setSpacing(true);
 		actions.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 		
-		save.addClickListener(e -> repository.save(Product));
+		save.addClickListener(e -> insertar(Product));
 		delete.addClickListener(e -> repository.delete(Product));
 		cancel.addClickListener(e -> editProduct(Product));
 		setVisible(false);
 	}
 	
+	public final void insertar(Product p){
+		boolean guardar = true;
+		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
+		
+		
+		if(familySelect.getValue() == null && p.getFamily() == ""){
+			errores = errores.concat("\\n - La familia de producto no puede estar vacía.");
+			guardar = false;
+		}
+
+		if(name.getValue() == ""){
+			errores = errores.concat("\\n - El nombre no puede estar vacío.");
+			guardar = false;
+		}
+		
+		try {
+		    BigDecimal monto = new BigDecimal(price.getValue());
+		    if (monto.compareTo(BigDecimal.ZERO) < 0){
+		    	errores = errores.concat("\\n - El precio no puede ser negativo.");
+		    	guardar = false;
+		    }
+		} catch (NumberFormatException e) {
+			errores = errores.concat("\\n - El precio debe ser numerico.");
+			guardar = false;
+		}
+		
+		if(price.getValue() == ""){
+			errores = errores.concat("\\n - El precio no puede estar vacío.");
+			guardar = false;
+		}
+		
+		try{ 
+		     int numero = Integer.parseInt(iva.getValue());
+		     if(numero < 0 || numero>100){
+		    	 errores = errores.concat("\\n - El iva debe estar entre 0-100.");
+				 guardar = false;
+		     }
+		}catch(NumberFormatException e){ 
+			errores = errores.concat("\\n - El iva debe ser numerico.");
+			guardar = false;
+		} 
+		
+		if(iva.getValue() == ""){
+			errores = errores.concat("\\n - El iva no puede estar vacío.");
+			guardar = false;
+		}
+		
+		if(guardar){
+			if(familySelect.getValue() != null)
+				p.setFamily(familySelect.getValue());
+			else
+				p.setFamily(p.getFamily());
+			repository.save(p);
+		}
+		else{
+			errores = errores.concat("');");
+			JavaScript.getCurrent().execute(errores);
+		}
+	}
 	
 	public interface ChangeHandler {
 		void onChange();
@@ -122,7 +190,7 @@ public class ProductEditor extends VerticalLayout{
 	}
 
 	public void setChangeHandler(ChangeHandler h) {
-		save.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());
+		save.addClickListener(e -> h.onChange());
 	}
 }

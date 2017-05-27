@@ -3,30 +3,26 @@ package com.proyecto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import javax.swing.JOptionPane;
 
 import com.vaadin.data.Binder;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.FileResource;
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Grid;
-import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.Upload.Receiver;
 import com.vaadin.ui.Upload.SucceededEvent;
 import com.vaadin.ui.Upload.SucceededListener;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
-import com.vaadin.ui.ListSelect;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.Upload;
@@ -121,8 +117,9 @@ public class MenuEditor extends VerticalLayout{
 		//select.setItems(lista);
 		productSelect = new NativeSelect<>("Selecciona producto", lista);
 		
-		HorizontalLayout h = new HorizontalLayout(productSelect, productCantidad, newProduct); 
-		VerticalLayout actionsProducts = new VerticalLayout(h, gridProdAct, deleteProduct);
+		HorizontalLayout h = new HorizontalLayout(productSelect, productCantidad); 
+		VerticalLayout v = new VerticalLayout(h, newProduct);
+		VerticalLayout actionsProducts = new VerticalLayout(v, gridProdAct, deleteProduct);
 		
 		addComponents(name, price, upload, image, actionsProducts, actions, menuImage);
 		
@@ -144,9 +141,40 @@ public class MenuEditor extends VerticalLayout{
 	}
 	
 	public final void guardarMenu(Menu m, ProductMenu pm){
-		//añadir productos al menu
-		m.setProductMenuList(pmList);
-		repository.save(m);
+		boolean guardar = true;
+		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
+		
+
+		if(name.getValue() == ""){
+			errores = errores.concat("\\n - El nombre no puede estar vacío.");
+			guardar = false;
+		}
+		
+		try {
+		    BigDecimal monto = new BigDecimal(price.getValue());
+		    if (monto.compareTo(BigDecimal.ZERO) < 0){
+		    	errores = errores.concat("\\n - El precio no puede ser negativo.");
+		    	guardar = false;
+		    }
+		} catch (NumberFormatException e) {
+			errores = errores.concat("\\n - El precio debe ser numerico.");
+			guardar = false;
+		}
+		
+		if(price.getValue() == ""){
+			errores = errores.concat("\\n - El precio no puede estar vacío.");
+			guardar = false;
+		}
+	
+		
+		if(guardar){
+			m.setProductMenuList(pmList);
+			repository.save(m);
+		}
+		else{
+			errores = errores.concat("');");
+			JavaScript.getCurrent().execute(errores);
+		}
 	}
 	
 	public final void insertarProducto(Menu m){
@@ -191,13 +219,11 @@ public class MenuEditor extends VerticalLayout{
 
 	public final void editMenu(Menu m) {
 		if (m == null) {
-			System.out.println("Zona1");
 			setVisible(false);
 			return;
 		}
 		final boolean persisted = m.getId() != null;
 		if (persisted) {
-			//System.out.println("Zona2");
 			gridProdAct.setItems();
 			menu = repository.findOne(m.getId());
 			menu.setProductMenuList(repoPM.findByIdMenu(menu.getId()));
@@ -205,19 +231,15 @@ public class MenuEditor extends VerticalLayout{
 				System.out.println(pm.getProductObj().getName());
 			if(!menu.getProductMenuList().isEmpty())
 				gridProdAct.setItems(menu.getProductMenuList());
-			//System.out.println(m.toString());
 		}
 		else {
-			System.out.println("Zona3");
 			menu = m;
 		}
-		//System.out.println("Zona4");
 		cancel.setVisible(persisted);
 
 		binder.setBean(menu);
 
 		setVisible(true);
-		//System.out.println("Zona5");
 		save.focus();
 		name.selectAll();
 	}

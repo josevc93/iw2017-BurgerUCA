@@ -19,7 +19,7 @@ import com.proyecto.User.User;
 public class OrderP {
 
 
-	public OrderP(boolean state, boolean takeAway, Long numMesa, Long coste, Zona zona, User user, Customer customer,
+	public OrderP(boolean state, boolean takeAway, Long numMesa, Double coste, Zona zona, User user, Customer customer,
 			List<OrderLineProduct> orderLineProductList, List<OrderLineMenu> orderLineMenuList,
 			List<GridTicket> gridTicketList) {
 		super();
@@ -47,7 +47,7 @@ public class OrderP {
 
     private Long numMesa;
     
-    private Long coste;
+    private Double coste;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="zona_id")
@@ -134,11 +134,11 @@ public class OrderP {
 		this.zona = zona;
 	}
 
-	public Long getCoste() {
+	public Double getCoste() {
 		return coste;
 	}
 
-	public void setCoste(Long coste) {
+	public void setCoste(Double coste) {
 		this.coste = coste;
 	}
 

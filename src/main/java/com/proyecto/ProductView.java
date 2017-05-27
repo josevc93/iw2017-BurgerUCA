@@ -61,7 +61,7 @@ public class ProductView extends VerticalLayout implements View {
 			editor.editProduct(e.getValue());
 		});
 
-		addNewBtn.addClickListener(e -> editor.editProduct(new Product("", "", "", "", "", null)));
+		addNewBtn.addClickListener(e -> editor.editProduct(new Product("", "", "", "", "src\\img\\not-found.png", null)));
 
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);

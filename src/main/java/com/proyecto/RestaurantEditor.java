@@ -6,6 +6,7 @@ import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.themes.ValoTheme;
@@ -40,12 +41,34 @@ public class RestaurantEditor extends VerticalLayout{
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
 		save.setClickShortcut(ShortcutAction.KeyCode.ENTER);
 		
-		save.addClickListener(e -> repository.save(restaurant));
+		save.addClickListener(e -> insertar(restaurant));
 		delete.addClickListener(e -> repository.delete(restaurant));
 		cancel.addClickListener(e -> editRestaurant(restaurant));
 		setVisible(false);
 	}
 	
+	public final void insertar(Restaurant r){
+		boolean guardar = true;
+		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
+		
+		if(name.getValue() == ""){
+			errores = errores.concat("\\n - El nombre no puede estar vacío.");
+			guardar = false;
+		}
+		
+		if(address.getValue() == ""){
+			errores = errores.concat("\\n - La dirección no puede estar vacía.");
+			guardar = false;
+		}
+	
+		if(guardar){
+			repository.save(r);
+		}
+		else{
+			errores = errores.concat("');");
+			JavaScript.getCurrent().execute(errores);
+		}
+	}
 	
 	public interface ChangeHandler {
 		void onChange();

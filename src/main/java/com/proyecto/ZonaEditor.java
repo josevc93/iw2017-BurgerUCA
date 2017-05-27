@@ -3,6 +3,7 @@ package com.proyecto;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.List;
 //import java.util.stream.Collectors;
 //import java.util.stream.IntStream;
@@ -19,6 +20,7 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.CssLayout;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -86,15 +88,56 @@ public class ZonaEditor extends VerticalLayout{
 	}
 	
 	public final void insertarZona(Zona z){
-		String cad = restaurantSelect.getValue().toString();
+		boolean guardar = true;
+		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
+		String cad = restaurantSelect.getValue();
 		
-		List<Restaurant> restaurant = repositoryRes.findByNameStartsWithIgnoreCase(cad);
-		z.setRestaurante(restaurant.get(0));
-		z.setState(state.getValue());
-		long l = Long.parseLong(numMesas.getValue());
-		z.setNumMesas(l);
+		System.out.println(cad);
+		System.out.println(z.getRestaurante());
+		if(cad == null && z.getRestaurante() == null){
+			errores = errores.concat("\\n - El restaurante no puede estar vacío.");
+			guardar = false;
+		}
+
+		if(name.getValue() == ""){
+			errores = errores.concat("\\n - El nombre no puede estar vacío.");
+			guardar = false;
+		}
 		
-		repositoryZona.save(zona);
+		try{ 
+		     int numero = Integer.parseInt(numMesas.getValue());
+		     if(numero < 0){
+		    	 errores = errores.concat("\\n - El numero de mesas debe ser un numero positivo.");
+				 guardar = false;
+		     }
+		}catch(NumberFormatException e){ 
+			errores = errores.concat("\\n - El numero de mesas debe ser numerico.");
+			guardar = false;
+		} 
+		
+		if(numMesas.getValue() == ""){
+			errores = errores.concat("\\n - El numero de mesa no puede estar vacio.");
+			guardar = false;
+		}
+		
+		if(guardar){
+			long l = Long.parseLong(numMesas.getValue());
+			z.setNumMesas(l);
+			
+			z.setState(state.getValue());
+			
+			if(cad != null){
+				List<Restaurant> restaurant = repositoryRes.findByNameStartsWithIgnoreCase(cad);
+				z.setRestaurante(restaurant.get(0));
+			}else
+				z.setRestaurante(z.getRestaurante());
+		
+			repositoryZona.save(z);
+		}
+		else{
+			errores = errores.concat("');");
+			JavaScript.getCurrent().execute(errores);
+		}
 	}
 	
 	public interface ChangeHandler {
