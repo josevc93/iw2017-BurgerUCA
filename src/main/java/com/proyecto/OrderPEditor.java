@@ -7,11 +7,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.util.StringUtils;
+
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.StringToLongConverter;
 import com.vaadin.event.ShortcutAction;
 import com.vaadin.server.FileResource;
 import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.shared.ui.ValueChangeMode;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
@@ -42,6 +45,8 @@ public class OrderPEditor extends VerticalLayout{
 	
 	private final MenuRepository repoM;
 	
+	private final CustomerRepository repoC;
+	
 	private final NativeSelect<String> zonasSelect;
 
 	private OrderP orderp;
@@ -53,6 +58,9 @@ public class OrderPEditor extends VerticalLayout{
 	final Grid<GridTicket> gridTicket = new Grid<GridTicket>(GridTicket.class);
 	
 	private List<GridTicket> gtList = new ArrayList<GridTicket>();
+	
+	private TextField filter = new TextField();
+	VerticalLayout gridCliente = new VerticalLayout(filter, gridCustomer);
 	
 	CheckBox takeAway = new CheckBox("Para llevar");
 	CheckBox state = new CheckBox("Finalizado");
@@ -79,10 +87,11 @@ public class OrderPEditor extends VerticalLayout{
 	Binder<OrderP> binder = new Binder<>(OrderP.class);
 	
 	public OrderPEditor(OrderPRepository repository, ProductRepository repoProduct
-						, ZonaRepository repoZona, MenuRepository repoM){
+						, ZonaRepository repoZona, MenuRepository repoM, CustomerRepository repoC){
 		this.repoP = repoProduct;
 		this.repository = repository;
 		this.repoZona = repoZona;
+		this.repoC = repoC;
 		this.repoM = repoM;
 		
 		menusLayout.setColumns(5);
@@ -90,10 +99,17 @@ public class OrderPEditor extends VerticalLayout{
 		bebidasLayout.setColumns(5);
 		postresLayout.setColumns(5);
 			
+		List<Customer> listCustomer = repoC.findAll();
 		gridCustomer.setColumns();
 		gridCustomer.addColumn(customer -> { return customer.getDireccion(); }).setCaption("Cliente");
 		gridCustomer.addColumn(customer -> { return customer.getTelefono(); }).setCaption("Telefono");
-		gridCustomer.setVisible(false);
+		gridCustomer.setItems(listCustomer);
+		gridCliente.setVisible(false);
+		
+		filter.setPlaceholder("Filtrar por telefono");
+
+		filter.setValueChangeMode(ValueChangeMode.LAZY);
+		filter.addValueChangeListener(e -> listPhones(e.getValue()));
 		
 		gridTicket.setColumns();
 		gridTicket.addColumn(ticket -> { return ticket.getNombre();}).setCaption("Nombre");
@@ -161,7 +177,7 @@ public class OrderPEditor extends VerticalLayout{
 			menusLayout.addComponent(image);
 		}
 		alimentos.addTab(menusLayout, "Menus");
-		addComponents(state, takeAway, gridCustomer, numMesa, zonasSelect, gridTicket, alimentos, actions);
+		addComponents(state, takeAway, gridCliente, numMesa, zonasSelect, gridTicket, alimentos, actions);
 		
 		binder.forField(numMesa)
 		  .withNullRepresentation("")
@@ -180,18 +196,18 @@ public class OrderPEditor extends VerticalLayout{
 		
 		takeAway.addValueChangeListener(e -> {
 			if(e.getValue() == false){
-				gridCustomer.setVisible(false);
+				gridCliente.setVisible(false);
 				zonasSelect.setVisible(true);
 				numMesa.setVisible(true);
 			}
 			else{
-				gridCustomer.setVisible(true);
+				gridCliente.setVisible(true);
 				zonasSelect.setVisible(false);
 				numMesa.setVisible(false);
 			}
 		});
 		
-		
+		listPhones(null);
 		
 		//save.addClickListener(e -> guardarMenu(menu, productMenu));
 		//delete.addClickListener(e -> repository.delete(menu));
@@ -335,5 +351,14 @@ public class OrderPEditor extends VerticalLayout{
 	public void setChangeHandler(ChangeHandler h) {
 		save.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());
+	}
+	
+	 void listPhones(String filterText) {
+		if (StringUtils.isEmpty(filterText)) {
+			gridCustomer.setItems((Collection<Customer>) repoC.findAll());
+		}
+		else {
+			gridCustomer.setItems(repoC.findBytelefonoStartsWithIgnoreCase(filterText));
+		}
 	}
 }

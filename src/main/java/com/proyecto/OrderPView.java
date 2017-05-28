@@ -53,8 +53,8 @@ public class OrderPView extends VerticalLayout implements View {
     //	addComponent(new Label("Trabaja en: " + SecurityUtils.getUserRestaurant()));
         //addComponent(new Label("Bienvenido a la gestión de pedidos."));
     	HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
-        VerticalLayout mainLayout = new VerticalLayout(actions, grid, editor);
-        VerticalLayout all = new VerticalLayout(actions, mainLayout);
+        VerticalLayout mainLayout = new VerticalLayout(actions, grid);
+        VerticalLayout all = new VerticalLayout(mainLayout, editor);
 		addComponent(all);
 		
 		grid.setColumns();
