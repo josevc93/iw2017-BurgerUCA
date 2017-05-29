@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
+import com.proyecto.security.SecurityUtils;
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.StringToLongConverter;
 import com.vaadin.event.ShortcutAction;
@@ -47,12 +48,23 @@ public class OrderPEditor extends VerticalLayout{
 	
 	private final CustomerRepository repoC;
 	
+	private final OrderLineMenuRepository repoOLM;
+	
+	private final OrderLineProductRepository repoOLP;
+	
 	private final NativeSelect<String> zonasSelect;
+	
+	private double precioTotal;
+	
+	private List<OrderLineProduct> orderLPlist = new ArrayList<>();
+	
+	private List<OrderLineMenu> orderLMlist = new ArrayList<>();
 
 	private OrderP orderp;
-	private Menu menu;
+	private OrderLineProduct orderLP;
+	/*private Menu menu;
 	private ProductMenu productMenu;
-	private Customer customer;
+	private Customer customer;*/
 	
 	final Grid<Customer> gridCustomer = new Grid<Customer>(Customer.class);
 	final Grid<GridTicket> gridTicket = new Grid<GridTicket>(GridTicket.class);
@@ -87,12 +99,15 @@ public class OrderPEditor extends VerticalLayout{
 	Binder<OrderP> binder = new Binder<>(OrderP.class);
 	
 	public OrderPEditor(OrderPRepository repository, ProductRepository repoProduct
-						, ZonaRepository repoZona, MenuRepository repoM, CustomerRepository repoC){
+						, ZonaRepository repoZona, MenuRepository repoM, CustomerRepository repoC, 
+						OrderLineMenuRepository repoOLM, OrderLineProductRepository repoOLP){
 		this.repoP = repoProduct;
 		this.repository = repository;
 		this.repoZona = repoZona;
 		this.repoC = repoC;
 		this.repoM = repoM;
+		this.repoOLM = repoOLM;
+		this.repoOLP = repoOLP;
 		
 		menusLayout.setColumns(5);
 	    comidasLayout.setColumns(5);
@@ -209,7 +224,9 @@ public class OrderPEditor extends VerticalLayout{
 		
 		listPhones(null);
 		
-		//save.addClickListener(e -> guardarMenu(menu, productMenu));
+		gridCustomer.asSingleSelect().addValueChangeListener(e -> { orderp.setCustomer(e.getValue()); });
+		
+		save.addClickListener(e -> guardarPedido(orderp));
 		//delete.addClickListener(e -> repository.delete(menu));
 		//cancel.addClickListener(e -> editOrderP(orderp));
 		/*newProduct.addClickListener(e -> insertarProducto(menu));
@@ -234,11 +251,17 @@ public class OrderPEditor extends VerticalLayout{
 		if(existe){
 			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
 			gtList.get(pos).setPrecio(Double.parseDouble(menuList.get(0).getPrice()) * gtList.get(pos).getCantidad());
+			orderLMlist.add(new OrderLineMenu(1, Double.parseDouble(menuList.get(0).getPrice()), 
+					orderp, menuList.get(0)));
 			
-    	}else
-			gtList.add(new GridTicket(name, 1L, Double.parseDouble(menuList.get(0).getPrice()), true)); 
+    	}else{
+			gtList.add(new GridTicket(name, 1L, Double.parseDouble(menuList.get(0).getPrice()), true));
+			orderLMlist.add(new OrderLineMenu(1, Double.parseDouble(menuList.get(0).getPrice()), 
+					orderp, menuList.get(0)));
+    	}
 		
 		gridTicket.setItems(gtList);
+		orderp.setOrderLineMenuList(orderLMlist);
 	}
 	
 	public final void insertarProducto(String name, OrderP orderp){
@@ -257,11 +280,17 @@ public class OrderPEditor extends VerticalLayout{
 		if(existe){
 			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
 			gtList.get(pos).setPrecio(Double.parseDouble(productList.get(0).getPrice()) * gtList.get(pos).getCantidad());
-			
-    	}else
-			gtList.add(new GridTicket(name, 1L, Double.parseDouble(productList.get(0).getPrice()), true)); 
+    	}else{
+			gtList.add(new GridTicket(name, 1L, Double.parseDouble(productList.get(0).getPrice()), true));
+			System.out.println("Orderp:"+orderp);
+			System.out.println("Precio: "+Double.parseDouble(productList.get(0).getPrice()));
+			System.out.println("producto: "+productList.get(0));
+			orderLPlist.add(new OrderLineProduct(1, Double.parseDouble(productList.get(0).getPrice()), 
+							orderp, productList.get(0)));
+    	}
 		
 		gridTicket.setItems(gtList);
+		orderp.setOrderLineProductList(orderLPlist);
 	}
 	
 	/*public final void guardarMenu(Menu m, ProductMenu pm){
@@ -270,35 +299,36 @@ public class OrderPEditor extends VerticalLayout{
 		repository.save(m);
 	}*/
 	
-	/*public final void insertarProducto(Menu m){
-		String nombreProducto = productSelect.getValue();
-		Long cantidadProducto = Long.parseLong(productCantidad.getValue());
-		List<Product> productList = repoP.findByNameStartsWithIgnoreCase(nombreProducto);
-		pmList = m.getProductMenuList();
-		if(!pmList.isEmpty()){
-			String a, b;
-			boolean pertenece = false;
-			int i = 0;
-			b = productList.get(0).getName();
-			while(!pertenece && i < pmList.size()){
-				a = pmList.get(i).getProductObj().getName();
-				if(b.equals(a)){
-					pmList.get(i).setCantidad(pmList.get(i).getCantidad()+cantidadProducto);
-					pertenece = true;
-				}
-				i++;
-			}
-			if(!pertenece){
-				ProductMenu pm = new ProductMenu(cantidadProducto, productList.get(0), m);
-				pmList.add(pm);
-			}
+	public void guardarPedido(OrderP p){
+		//primero controlamos si el pedido es para llevar o no
+		if(takeAway.getValue()){
+			System.out.println("Accediendo a guardado");
+			p.setUser(SecurityUtils.getUserLogin());
+			costeTotal(gtList);
+			p.setOrderLineProductList(orderLPlist);
+			repository.save(p);
+			for(OrderLineProduct item: orderLPlist)
+				repoOLP.save(item);
 		}
 		else{
-			ProductMenu pm = new ProductMenu(cantidadProducto, productList.get(0), m);
-			pmList.add(pm);
+			System.out.println("Valor a falso");
 		}
-		gridProdAct.setItems(pmList);
-	}*/
+		//primero hacemos un save de OrderPRepository
+		/*String nameZona = zonasSelect.getValue();
+		List<Zona> zList = repoZona.findByNameStartsWithIgnoreCase(nameZona);
+		orderp.setZona(zList.get(0));
+		orderp.setUser(SecurityUtils.getUserLogin());
+		costeTotal(gtList);
+		System.out.println("El coste es: "+orderp.getCoste());
+		System.out.println("El num mesa es: "+orderp.getNumMesa());
+		System.out.println("El cliente es: "+orderp.getCustomer());
+		System.out.println("El ticket es: "+orderp.getGridTicketList());
+		System.out.println("El lineaMenu es: "+orderp.getOrderLineMenuList());
+		System.out.println("El lineaProd es: "+orderp.getOrderLineProductList());
+		System.out.println("El empleado es: "+orderp.getUser());
+		System.out.println("La zona es: "+orderp.getZona());*/
+		//repository.save(orderp);
+	}
 	
 	/*public final void eliminarProducto(ProductMenu pm){
 		pmList.remove(pm);
@@ -361,4 +391,12 @@ public class OrderPEditor extends VerticalLayout{
 			gridCustomer.setItems(repoC.findBytelefonoStartsWithIgnoreCase(filterText));
 		}
 	}
+	 
+	 public void costeTotal(List<GridTicket> gtList){
+		 double precioTotal = 0.0;
+		 for(GridTicket item: gtList)
+			 precioTotal += item.getPrecio();
+		 
+		 orderp.setCoste(precioTotal);
+	 }
 }
