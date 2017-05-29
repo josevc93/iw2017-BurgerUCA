@@ -19,17 +19,17 @@ public final class SecurityUtils {
         return authentication != null && authentication.isAuthenticated();
     }
 
-    public static Object getUserLogin(){
+    public static User getUserLogin(){
     	 org.springframework.security.core.Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     	 User user = (User)authentication.getPrincipal();
-    	 return user.getFirstName()+" "+user.getLastName();
+    	 return user;
     }
     
-    public static Object getUserRestaurant(){
+    /*public User getUserRestaurant(){
    	 org.springframework.security.core.Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
    	 User user = (User)authentication.getPrincipal();
-   	 return user.getRestaurant().getName();
-   }
+   	 return user;
+   }*/
     
     public static boolean hasRole(String role) {
     	
