@@ -19,6 +19,7 @@ public class OrderLineMenu {
 		this.menuObj = menuObj;
 	}
 
+	protected OrderLineMenu(){}
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;

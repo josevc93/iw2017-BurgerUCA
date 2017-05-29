@@ -61,13 +61,13 @@ public class OrderP {
     @JoinColumn(name="customer_ID")
     private Customer customer;
     
-    @OneToMany(mappedBy = "orderpObj", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orderpObj", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderLineProduct> orderLineProductList = new ArrayList<OrderLineProduct>();
     
-    @OneToMany(mappedBy = "menuObj", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "menuObj", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderLineMenu> orderLineMenuList = new ArrayList<OrderLineMenu>();
     
-    @OneToMany(mappedBy = "orderPObj", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "orderPObj", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GridTicket> GridTicketList = new ArrayList<GridTicket>();
 
 	public Long getId() {
@@ -88,10 +88,6 @@ public class OrderP {
 
 	public Long getNumMesa() {
 		return numMesa;
-	}
-
-	public void setNumMesas(Long numMesa) {
-		this.numMesa = numMesa;
 	}
 
 	public User getUser() {

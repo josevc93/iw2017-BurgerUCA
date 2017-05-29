@@ -54,11 +54,9 @@ public class OrderPEditor extends VerticalLayout{
 	
 	private final NativeSelect<String> zonasSelect;
 	
-	private double precioTotal;
+	protected List<OrderLineProduct> orderLPlist = new ArrayList<>();
 	
-	private List<OrderLineProduct> orderLPlist = new ArrayList<>();
-	
-	private List<OrderLineMenu> orderLMlist = new ArrayList<>();
+	protected List<OrderLineMenu> orderLMlist = new ArrayList<>();
 
 	private OrderP orderp;
 	private OrderLineProduct orderLP;
@@ -175,7 +173,7 @@ public class OrderPEditor extends VerticalLayout{
 			image.setWidth(100, Unit.PIXELS);
 			image.setHeight(100, Unit.PIXELS);
 			image.setSource(new FileResource(file));
-			image.addClickListener(e -> insertarProducto(image.getCaption(),orderp));
+			image.addClickListener(e -> insertarProducto(image.getCaption(), orderp));
 			postresLayout.addComponent(image);
 		}
 		alimentos.addTab(postresLayout, "Postres");
@@ -227,10 +225,8 @@ public class OrderPEditor extends VerticalLayout{
 		gridCustomer.asSingleSelect().addValueChangeListener(e -> { orderp.setCustomer(e.getValue()); });
 		
 		save.addClickListener(e -> guardarPedido(orderp));
-		//delete.addClickListener(e -> repository.delete(menu));
+		delete.addClickListener(e -> eliminarPedido(orderp));
 		//cancel.addClickListener(e -> editOrderP(orderp));
-		/*newProduct.addClickListener(e -> insertarProducto(menu));
-		deleteProduct.addClickListener(e -> eliminarProducto(productMenu));*/
 		setVisible(false);
 	}
 	
@@ -267,11 +263,12 @@ public class OrderPEditor extends VerticalLayout{
 	public final void insertarProducto(String name, OrderP orderp){
 		List<Product> productList = repoP.findByNameStartsWithIgnoreCase(name);
 		gtList = orderp.getGridTicketList();
-		
+		System.out.println("Tamaño de gtList: "+gtList.size());
+		System.out.println(productList.get(0));
 		boolean existe = false;
 		int pos = 0;
 		while(!existe && pos<gtList.size()){
-			if(name == gtList.get(pos).getNombre())
+			if(name.equals(gtList.get(pos).getNombre()))
 				existe = true;
 			pos++;
 		}
@@ -280,62 +277,55 @@ public class OrderPEditor extends VerticalLayout{
 		if(existe){
 			gtList.get(pos).setCantidad(gtList.get(pos).getCantidad()+1);
 			gtList.get(pos).setPrecio(Double.parseDouble(productList.get(0).getPrice()) * gtList.get(pos).getCantidad());
+			orderLPlist.get(pos).setCantidad(orderLPlist.get(pos).getCantidad()+1);
+			orderLPlist.get(pos).setPrecio(orderLPlist.get(pos).getPrecio()*orderLPlist.get(pos).getCantidad());
     	}else{
 			gtList.add(new GridTicket(name, 1L, Double.parseDouble(productList.get(0).getPrice()), true));
 			System.out.println("Orderp:"+orderp);
 			System.out.println("Precio: "+Double.parseDouble(productList.get(0).getPrice()));
 			System.out.println("producto: "+productList.get(0));
-			orderLPlist.add(new OrderLineProduct(1, Double.parseDouble(productList.get(0).getPrice()), 
-							orderp, productList.get(0)));
+			OrderLineProduct o = new OrderLineProduct(1, Double.parseDouble(productList.get(0).getPrice()), orderp, productList.get(0));
+			System.out.println("Objeto: "+o);
+			orderLPlist.add(o);
     	}
 		
 		gridTicket.setItems(gtList);
 		orderp.setOrderLineProductList(orderLPlist);
 	}
 	
-	/*public final void guardarMenu(Menu m, ProductMenu pm){
-		//añadir productos al menu
-		m.setProductMenuList(pmList);
-		repository.save(m);
-	}*/
-	
 	public void guardarPedido(OrderP p){
+		p.setUser(SecurityUtils.getUserLogin());
+		costeTotal(gtList);
 		//primero controlamos si el pedido es para llevar o no
 		if(takeAway.getValue()){
+			p.setState(true);
 			System.out.println("Accediendo a guardado");
-			p.setUser(SecurityUtils.getUserLogin());
-			costeTotal(gtList);
 			p.setOrderLineProductList(orderLPlist);
 			repository.save(p);
 			for(OrderLineProduct item: orderLPlist)
 				repoOLP.save(item);
+			for(OrderLineMenu item: orderLMlist)
+				repoOLM.save(item);
 		}
 		else{
 			System.out.println("Valor a falso");
+			String zonaName = zonasSelect.getValue();
+			List<Zona> z = repoZona.findByNameStartsWithIgnoreCase(zonaName);
+			orderp.setZona(z.get(0));
+			orderp.setNumMesa(Long.parseLong(numMesa.getValue()));
+			p.setOrderLineProductList(orderLPlist);
+			repository.save(p);
+			for(OrderLineProduct item: orderLPlist)
+				repoOLP.save(item);
+			for(OrderLineMenu item: orderLMlist)
+				repoOLM.save(item);
+			
 		}
-		//primero hacemos un save de OrderPRepository
-		/*String nameZona = zonasSelect.getValue();
-		List<Zona> zList = repoZona.findByNameStartsWithIgnoreCase(nameZona);
-		orderp.setZona(zList.get(0));
-		orderp.setUser(SecurityUtils.getUserLogin());
-		costeTotal(gtList);
-		System.out.println("El coste es: "+orderp.getCoste());
-		System.out.println("El num mesa es: "+orderp.getNumMesa());
-		System.out.println("El cliente es: "+orderp.getCustomer());
-		System.out.println("El ticket es: "+orderp.getGridTicketList());
-		System.out.println("El lineaMenu es: "+orderp.getOrderLineMenuList());
-		System.out.println("El lineaProd es: "+orderp.getOrderLineProductList());
-		System.out.println("El empleado es: "+orderp.getUser());
-		System.out.println("La zona es: "+orderp.getZona());*/
-		//repository.save(orderp);
 	}
 	
-	/*public final void eliminarProducto(ProductMenu pm){
-		pmList.remove(pm);
-		repoPM.delete(pm);
-		gridProdAct.setItems(pmList);
-	}*/
-	
+	public void eliminarPedido(OrderP orderp){
+		repository.delete(orderp);
+	}
 	public interface ChangeHandler {
 		void onChange();
 	}
@@ -347,37 +337,38 @@ public class OrderPEditor extends VerticalLayout{
 		}
 		final boolean persisted = or.getId() != null;
 		if (persisted) {
-			/*gridProdAct.setItems();
-			menu = repository.findOne(m.getId());
-			menu.setProductMenuList(repoPM.findByIdMenu(menu.getId()));
-			for(ProductMenu pm: menu.getProductMenuList())
-				System.out.println(pm.getProductObj().getName());
-			if(!menu.getProductMenuList().isEmpty())
-				gridProdAct.setItems(menu.getProductMenuList());*/
+			System.out.println("Existe en la bd");
+			//gridProdAct.setItems();
+			orderp = repository.findOne(or.getId());
+			//System.out.println("Id de orderp: "+orderp.getId());
+			//List<OrderLineMenu> l = repoOLM.findByIdMenu(orderp.getId());
+			orderp.setOrderLineMenuList(repoOLM.findByIdMenu(orderp.getId()));
+			orderp.setOrderLineProductList(repoOLP.findByIdProduct(orderp.getId()));
+			System.out.println("tam productos: "+orderp.getOrderLineProductList().size());
+			System.out.println("tam menus: "+orderp.getOrderLineMenuList().size());
+			List<GridTicket> items = new ArrayList<>();
+			for(OrderLineProduct i: orderp.getOrderLineProductList())
+				items.add(new GridTicket(i.getProductObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true));
+			for(OrderLineMenu i: orderp.getOrderLineMenuList())
+				items.add(new GridTicket(i.getMenuObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true));
+			
+			//System.out.println("El ticket tiene: "+items.size());
+			gridTicket.setItems(items);
+			orderp.setGridTicketList(items);
 		}
 		else {
-			//System.out.println("Zona3");
+			System.out.println("Nuevo");
+			gridTicket.setItems();
 			orderp = or;
 		}
-		//System.out.println("Zona4");
 		cancel.setVisible(persisted);
 
 		binder.setBean(orderp);
 
 		setVisible(true);
-		//System.out.println("Zona5");
 		save.focus();
-		//name.selectAll();
 	}
 
-	/*public final void editProdAct(ProductMenu pm){
-		System.out.println("El produto es "+pm);
-		if(pm != null){
-				productMenu = pm;
-				pmList = menu.getProductMenuList();
-		}
-	}*/
-	
 	public void setChangeHandler(ChangeHandler h) {
 		save.addClickListener(e -> h.onChange());
 		delete.addClickListener(e -> h.onChange());

@@ -19,6 +19,8 @@ public class GridTicket {
 		this.tipo = tipo;
 	}
 
+	protected GridTicket(){}
+	
 	@Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
