@@ -1,20 +1,12 @@
 package com.proyecto;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
+
 import java.util.List;
-//import java.util.stream.Collectors;
-//import java.util.stream.IntStream;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import javax.swing.JOptionPane;
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.StringToLongConverter;
 import com.vaadin.event.ShortcutAction;
-import com.vaadin.server.FileResource;
 import com.vaadin.spring.annotation.SpringComponent;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
@@ -92,8 +84,6 @@ public class ZonaEditor extends VerticalLayout{
 		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
 		String cad = restaurantSelect.getValue();
 		
-		System.out.println(cad);
-		System.out.println(z.getRestaurante());
 		if(cad == null && z.getRestaurante() == null){
 			errores = errores.concat("\\n - El restaurante no puede estar vacío.");
 			guardar = false;

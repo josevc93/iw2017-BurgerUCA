@@ -1,14 +1,27 @@
 package com.proyecto;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
 import com.proyecto.security.SecurityUtils;
 import com.vaadin.data.Binder;
 import com.vaadin.data.converter.StringToLongConverter;
@@ -26,6 +39,7 @@ import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.ListSelect;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.TabSheet;
@@ -60,9 +74,6 @@ public class OrderPEditor extends VerticalLayout{
 
 	private OrderP orderp;
 	private OrderLineProduct orderLP;
-	/*private Menu menu;
-	private ProductMenu productMenu;
-	private Customer customer;*/
 	
 	final Grid<Customer> gridCustomer = new Grid<Customer>(Customer.class);
 	final Grid<GridTicket> gridTicket = new Grid<GridTicket>(GridTicket.class);
@@ -139,7 +150,6 @@ public class OrderPEditor extends VerticalLayout{
 		//Lista de comidas existentes
 		Collection<Product> comidas = repoP.findByFamily("comidas");
 		for(Product p: comidas){
-			//System.out.println(p.getProductImage());
 			file = new File(p.getProductImage());
 			Image image = new Image(p.getName());
 			image.setWidth(100, Unit.PIXELS);
@@ -153,7 +163,6 @@ public class OrderPEditor extends VerticalLayout{
 		//Lista de bebidas existentes
 		Collection<Product> bebidas = repoP.findByFamily("bebidas");
 		for(Product p: bebidas){
-			//System.out.println(p.getProductImage());
 			file = new File(p.getProductImage());
 			Image image = new Image(p.getName());
 			image.setWidth(100, Unit.PIXELS);
@@ -167,7 +176,6 @@ public class OrderPEditor extends VerticalLayout{
 		//Lista de postres existentes
 		Collection<Product> postres = repoP.findByFamily("postres");
 		for(Product p: postres){
-			//System.out.println(p.getProductImage());
 			file = new File(p.getProductImage());
 			Image image = new Image(p.getName());
 			image.setWidth(100, Unit.PIXELS);
@@ -200,8 +208,6 @@ public class OrderPEditor extends VerticalLayout{
 		
 		binder.bindInstanceFields(this);
 		
-		//gridProdAct.asSingleSelect().addValueChangeListener(e -> { editProdAct(e.getValue()); });
-		
 		setSpacing(true);
 		actions.setStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
 		save.setStyleName(ValoTheme.BUTTON_PRIMARY);
@@ -226,7 +232,6 @@ public class OrderPEditor extends VerticalLayout{
 		
 		save.addClickListener(e -> guardarPedido(orderp));
 		delete.addClickListener(e -> eliminarPedido(orderp));
-		//cancel.addClickListener(e -> editOrderP(orderp));
 		setVisible(false);
 	}
 	
@@ -251,7 +256,7 @@ public class OrderPEditor extends VerticalLayout{
 					orderp, menuList.get(0)));
 			
     	}else{
-			gtList.add(new GridTicket(name, 1L, Double.parseDouble(menuList.get(0).getPrice()), true));
+			gtList.add(new GridTicket(name, 1L, Double.parseDouble(menuList.get(0).getPrice()), true, "", "menu")); //MENU
 			orderLMlist.add(new OrderLineMenu(1, Double.parseDouble(menuList.get(0).getPrice()), 
 					orderp, menuList.get(0)));
     	}
@@ -263,8 +268,6 @@ public class OrderPEditor extends VerticalLayout{
 	public final void insertarProducto(String name, OrderP orderp){
 		List<Product> productList = repoP.findByNameStartsWithIgnoreCase(name);
 		gtList = orderp.getGridTicketList();
-		System.out.println("Tamaño de gtList: "+gtList.size());
-		System.out.println(productList.get(0));
 		boolean existe = false;
 		int pos = 0;
 		while(!existe && pos<gtList.size()){
@@ -280,12 +283,8 @@ public class OrderPEditor extends VerticalLayout{
 			orderLPlist.get(pos).setCantidad(orderLPlist.get(pos).getCantidad()+1);
 			orderLPlist.get(pos).setPrecio(orderLPlist.get(pos).getPrecio()*orderLPlist.get(pos).getCantidad());
     	}else{
-			gtList.add(new GridTicket(name, 1L, Double.parseDouble(productList.get(0).getPrice()), true));
-			System.out.println("Orderp:"+orderp);
-			System.out.println("Precio: "+Double.parseDouble(productList.get(0).getPrice()));
-			System.out.println("producto: "+productList.get(0));
+			gtList.add(new GridTicket(name, 1L, Double.parseDouble(productList.get(0).getPrice()), true, productList.get(0).getIva(),productList.get(0).getFamily()));
 			OrderLineProduct o = new OrderLineProduct(1, Double.parseDouble(productList.get(0).getPrice()), orderp, productList.get(0));
-			System.out.println("Objeto: "+o);
 			orderLPlist.add(o);
     	}
 		
@@ -293,33 +292,139 @@ public class OrderPEditor extends VerticalLayout{
 		orderp.setOrderLineProductList(orderLPlist);
 	}
 	
-	public void guardarPedido(OrderP p){
-		p.setUser(SecurityUtils.getUserLogin());
-		costeTotal(gtList);
-		//primero controlamos si el pedido es para llevar o no
-		if(takeAway.getValue()){
-			p.setState(true);
-			System.out.println("Accediendo a guardado");
-			p.setOrderLineProductList(orderLPlist);
-			repository.save(p);
-			for(OrderLineProduct item: orderLPlist)
-				repoOLP.save(item);
-			for(OrderLineMenu item: orderLMlist)
-				repoOLM.save(item);
+	/*Esta función genera un ticket para cocina.*/
+	public void imprimirTicketCocina(OrderP p, List<GridTicket> gtList){
+		boolean soloBebidas = true;
+		for(GridTicket item: gtList)
+			if(!item.getFamily().equals("bebidas"))
+				soloBebidas = false;
+		if(!soloBebidas){
+			try{
+				Document documento = new Document();
+				Calendar calendario = new GregorianCalendar();
+				FileOutputStream ficheroPdf = new FileOutputStream("TicketCocina/ticket_" + calendario.get(Calendar.HOUR_OF_DAY) + 
+						calendario.get(Calendar.MINUTE) + calendario.get(Calendar.SECOND) +  ".pdf");
+				PdfWriter.getInstance(documento,ficheroPdf).setInitialLeading(20);
+				documento.open();
+				documento.add(new Paragraph("Ticket cocina",
+						FontFactory.getFont("arial",  22, Font.BOLD, BaseColor.BLUE)));		
+				documento.add(new Paragraph(" "));
+				documento.add(new Paragraph(""));
+				
+				for(GridTicket item: gtList)
+					if(!item.getFamily().equals("bebidas"))
+						documento.add(new Paragraph(item.getNombre() + " " + "(" + item.getCantidad() + ")"));
+				
+				documento.close();
+			}catch(Exception e){System.out.println(e);}
 		}
-		else{
-			System.out.println("Valor a falso");
-			String zonaName = zonasSelect.getValue();
-			List<Zona> z = repoZona.findByNameStartsWithIgnoreCase(zonaName);
-			orderp.setZona(z.get(0));
-			orderp.setNumMesa(Long.parseLong(numMesa.getValue()));
-			p.setOrderLineProductList(orderLPlist);
-			repository.save(p);
-			for(OrderLineProduct item: orderLPlist)
-				repoOLP.save(item);
-			for(OrderLineMenu item: orderLMlist)
-				repoOLM.save(item);
+	}
+	
+	
+	/*Esta función genera un ticket con la cuenta total, una vez cerrado el pedido.*/
+	public void imprimirTicketFinal(OrderP p, boolean paraLlevar){
+		try{
+			Document documento = new Document();
+			Calendar calendario = new GregorianCalendar();
+			FileOutputStream ficheroPdf = new FileOutputStream("TicketFinal/ticket_" + calendario.get(Calendar.HOUR_OF_DAY) + 
+					calendario.get(Calendar.MINUTE) + calendario.get(Calendar.SECOND) +  ".pdf");
+			PdfWriter.getInstance(documento,ficheroPdf).setInitialLeading(20);
+			documento.open();
+			documento.add(new Paragraph("BurguerUCA",
+					FontFactory.getFont("arial",  22, Font.BOLD, BaseColor.BLUE)));		
+			documento.add(new Paragraph(" "));
+			documento.add(new Paragraph(""));
 			
+			if(paraLlevar)
+				documento.add(new Paragraph("Pedido para llevar",
+						FontFactory.getFont("arial",  12)));
+			else
+				documento.add(new Paragraph("Pedido para consumir en el local",
+						FontFactory.getFont("arial",  12)));
+			
+			documento.add(new Paragraph(" "));
+			
+			for(OrderLineProduct item: p.getOrderLineProductList())
+				documento.add(new Paragraph(item.getProductObj().getName() + " " + "(" + item.getCantidad() + ") (" + item.getPrecio() + " €)"));
+			
+			for(OrderLineMenu item: p.getOrderLineMenuList())
+				documento.add(new Paragraph(item.getMenuObj().getName() + " " + "(" + item.getCantidad() + ") (" + item.getPrecio() + " €)"));
+			
+			documento.add(new Paragraph(" "));
+			DecimalFormat f = new DecimalFormat("##.00");
+			
+			documento.add(new Paragraph("Coste : " + f.format(costeTotalsinIVA(p.getOrderLineProductList(), p.getOrderLineMenuList())) + " €",
+					FontFactory.getFont("arial",  12)));
+			documento.add(new Paragraph("Coste total con IVA: " + f.format(costeTotalIVA(p.getOrderLineProductList(), p.getOrderLineMenuList())) + " €",
+					FontFactory.getFont("arial",  12)));
+			documento.add(new Paragraph(" "));
+			documento.add(new Paragraph("***El precio de los productos se muestran sin iva***",
+					FontFactory.getFont("arial",  10, Font.ITALIC)));
+			documento.close();
+		}catch(Exception e){System.out.println(e);}
+	}
+	
+	public void guardarPedido(OrderP p){
+		boolean guardar = true;
+		String cad = zonasSelect.getValue();
+		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
+		if(takeAway.getValue()){
+			if(orderp.getCustomer() == null){
+				errores = errores.concat("\\n - Debes seleccionar un cliente.");
+				guardar = false;
+			}
+		}else{
+			try{
+				int numero = Integer.parseInt(numMesa.getValue());
+				if(numero < 0 ){
+			    	 errores = errores.concat("\\n - El numero de mesas debe ser un numero positivo.");
+					 guardar = false;
+			     }
+			}catch(NumberFormatException e){ 
+				errores = errores.concat("\\n - El numero de mesas debe ser numerico.");
+				guardar = false;
+			} 			
+			if(cad == null && p.getZona() == null){
+				errores = errores.concat("\\n - Debes elegir zona.");
+				guardar = false;
+			}
+		}
+		
+		if(guardar){
+			boolean ticketFinal = state.getValue();
+			p.setUser(SecurityUtils.getUserLogin());
+			costeTotal(gtList);
+			//primero controlamos si el pedido es para llevar o no
+			if(takeAway.getValue()){
+				p.setState(true);
+				p.setOrderLineProductList(orderLPlist);
+				repository.save(p);
+				for(OrderLineProduct item: orderLPlist)
+					repoOLP.save(item);
+				for(OrderLineMenu item: orderLMlist)
+					repoOLM.save(item);
+			}
+			else{
+				if(cad==null){ //Si no se selecciona zona, coge la ya existente
+					orderp.setZona(orderp.getZona());
+				}else{ //Si se selecciona, la reemplaza
+					List<Zona> z = repoZona.findByNameStartsWithIgnoreCase(cad);
+					orderp.setZona(z.get(0));
+				}
+				orderp.setNumMesa(Long.parseLong(numMesa.getValue()));
+				p.setOrderLineProductList(orderLPlist);
+				repository.save(p);
+				for(OrderLineProduct item: orderLPlist)
+					repoOLP.save(item);
+				for(OrderLineMenu item: orderLMlist)
+					repoOLM.save(item);
+			}
+			imprimirTicketCocina(p, gtList);
+			if(ticketFinal)
+				imprimirTicketFinal(p, takeAway.getValue());	
+		}else{
+			errores = errores.concat("');");
+			JavaScript.getCurrent().execute(errores);
 		}
 	}
 	
@@ -337,27 +442,21 @@ public class OrderPEditor extends VerticalLayout{
 		}
 		final boolean persisted = or.getId() != null;
 		if (persisted) {
-			System.out.println("Existe en la bd");
-			//gridProdAct.setItems();
 			orderp = repository.findOne(or.getId());
-			//System.out.println("Id de orderp: "+orderp.getId());
-			//List<OrderLineMenu> l = repoOLM.findByIdMenu(orderp.getId());
 			orderp.setOrderLineMenuList(repoOLM.findByIdMenu(orderp.getId()));
 			orderp.setOrderLineProductList(repoOLP.findByIdProduct(orderp.getId()));
-			System.out.println("tam productos: "+orderp.getOrderLineProductList().size());
-			System.out.println("tam menus: "+orderp.getOrderLineMenuList().size());
+			orderLPlist = orderp.getOrderLineProductList();
+			orderLMlist = orderp.getOrderLineMenuList();
 			List<GridTicket> items = new ArrayList<>();
 			for(OrderLineProduct i: orderp.getOrderLineProductList())
-				items.add(new GridTicket(i.getProductObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true));
+				items.add(new GridTicket(i.getProductObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true, i.getProductObj().getIva(), i.getProductObj().getFamily()));
 			for(OrderLineMenu i: orderp.getOrderLineMenuList())
-				items.add(new GridTicket(i.getMenuObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true));
+				items.add(new GridTicket(i.getMenuObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true, "", "menu")); //MENU
 			
-			//System.out.println("El ticket tiene: "+items.size());
 			gridTicket.setItems(items);
 			orderp.setGridTicketList(items);
 		}
 		else {
-			System.out.println("Nuevo");
 			gridTicket.setItems();
 			orderp = or;
 		}
@@ -389,5 +488,34 @@ public class OrderPEditor extends VerticalLayout{
 			 precioTotal += item.getPrecio();
 		 
 		 orderp.setCoste(precioTotal);
+	 }
+	 
+	 public double costeTotalsinIVA(List<OrderLineProduct> pList, List<OrderLineMenu> mList){
+		 double precioTotal = 0.0;
+		 for(OrderLineProduct item: pList)
+			 precioTotal += item.getPrecio();
+		 
+		 for(OrderLineMenu item: mList)
+			 precioTotal += item.getPrecio();
+		 
+		return precioTotal;
+	 }
+	 
+	 public double costeTotalIVA(List<OrderLineProduct> pList,  List<OrderLineMenu> mList){
+		 double precioTotal = 0.0;
+		 double precioMenu = 0.0;
+		 for(OrderLineProduct item: pList)
+			 precioTotal += item.getPrecio() + ( item.getPrecio() * (Double.parseDouble(item.getProductObj().getIva())/100 ) );
+		 
+		 for(OrderLineMenu item: mList){
+			 precioMenu = 0.0;
+			 for(ProductMenu pm : item.getMenuObj().getProductMenuList()){
+				 precioMenu += ((Double.parseDouble(pm.getProductObj().getPrice()) * 
+						 Double.parseDouble(pm.getProductObj().getIva()) / 100)) ;
+			 }
+			 precioTotal += (item.getPrecio() + precioMenu) * item.getCantidad();
+		 }
+		 
+		return precioTotal;
 	 }
 }

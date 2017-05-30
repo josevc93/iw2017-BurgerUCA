@@ -76,5 +76,13 @@ public class OrderLineMenu {
 		this.menuObj = menuObj;
 	}
 
+	public OrderP getOrderpObj() {
+		return orderpObj;
+	}
+
+	public void setOrderpObj(OrderP orderpObj) {
+		this.orderpObj = orderpObj;
+	}
+
 
 }

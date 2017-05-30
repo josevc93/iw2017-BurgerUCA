@@ -11,12 +11,14 @@ import javax.persistence.ManyToOne;
 @Entity 
 public class GridTicket {
 	
-	public GridTicket(String nombre, Long cantidad, Double precio, boolean tipo) {
+	public GridTicket(String nombre, Long cantidad, Double precio, boolean tipo, String iva, String family) {
 		super();
 		this.nombre = nombre;
 		this.cantidad = cantidad;
 		this.precio = precio;
 		this.tipo = tipo;
+		this.iva = iva;
+		this.family = family;
 	}
 
 	protected GridTicket(){}
@@ -30,6 +32,10 @@ public class GridTicket {
 	private Long cantidad;
 	
 	private Double precio;
+	
+	private String iva;
+	
+	private String family;
 	
 	boolean tipo;
 	
@@ -75,5 +81,21 @@ public class GridTicket {
 
 	public void setTipo(boolean tipo) {
 		this.tipo = tipo;
+	}
+
+	public String getIva() {
+		return iva;
+	}
+
+	public void setIva(String iva) {
+		this.iva = iva;
+	}
+
+	public String getFamily() {
+		return family;
+	}
+
+	public void setFamily(String family) {
+		this.family = family;
 	}
 }
