@@ -50,8 +50,8 @@ public class MenuEditor extends VerticalLayout{
 	
 	final Grid<ProductMenu> gridProdAct = new Grid<ProductMenu>(ProductMenu.class);
 	
-	TextField name = new TextField("Nombre");
-	TextField price = new TextField("Precio");
+	TextField name = new TextField("Nombre (*)");
+	TextField price = new TextField("Precio (*)");
 	TextField menuImage = new TextField("Image");
 	
 	Button save = new Button("Guardar");

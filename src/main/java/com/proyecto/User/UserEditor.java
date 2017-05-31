@@ -21,6 +21,7 @@ import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CssLayout;
 import com.vaadin.ui.Image;
+import com.vaadin.ui.JavaScript;
 import com.vaadin.ui.NativeSelect;
 import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
@@ -42,14 +43,14 @@ public class UserEditor extends VerticalLayout{
 
 	private User user;
 	
-	TextField firstName = new TextField("Nombre");
-	TextField lastName = new TextField("Apellido");
-	TextField userName = new TextField("Nombre de usuario");
-	PasswordField password = new PasswordField("Contraseña");
-	TextField email = new TextField("Email");
+	TextField firstName = new TextField("Nombre (*)");
+	TextField lastName = new TextField("Apellido (*)");
+	TextField userName = new TextField("Nombre de usuario (*)");
+	PasswordField password = new PasswordField("Contraseña (*)");
+	TextField email = new TextField("Email (*)");
 	TextField address = new TextField("Dirección");
 	TextField telephone_number = new TextField("Numero");
-	TextField position = new TextField("Cargo");
+	NativeSelect<String> cargoSelect;
 	TextField urlAvatar = new TextField();
 	NativeSelect<String> restaurantSelect;
 	
@@ -68,6 +69,11 @@ public class UserEditor extends VerticalLayout{
 
 		final Image image = new Image();
 		
+		List<String> cargos = new ArrayList<String>();
+		cargos.add("Gerente");
+		cargos.add("Camarero");
+		cargoSelect = new NativeSelect<>("Cargo", cargos);
+		
 		
 		class ImageUploader implements Receiver, SucceededListener {
 			
@@ -76,12 +82,9 @@ public class UserEditor extends VerticalLayout{
 				FileOutputStream fos = null;
 				try{
 					file = new File("src/img/"+filename);
-					//System.out.println("Nombre fichero "+file);
 					fos = new FileOutputStream(file);
 				}catch(final java.io.FileNotFoundException e){
 					JOptionPane.showMessageDialog(null, "Error al subir el fichero");
-					 /*Notification.show("No se pudo abrir el fichero", 
-									Notification.Type.ERROR_MESSAGE);*/
 					return null;
 				}
 				return fos;
@@ -110,7 +113,7 @@ public class UserEditor extends VerticalLayout{
 		restaurantSelect = new NativeSelect<>("Selecciona restaurante", restaurantList);
 		restaurantSelect.setEmptySelectionAllowed(false);
 
-		addComponents(firstName, lastName, userName , password, email, address, telephone_number, position, restaurantSelect, upload, image, actions, urlAvatar);
+		addComponents(firstName, lastName, userName , password, email, address, telephone_number,  cargoSelect, restaurantSelect, upload, image, actions, urlAvatar);
 		
 		binder.bindInstanceFields(this);
 		
@@ -126,10 +129,78 @@ public class UserEditor extends VerticalLayout{
 	}
 	
 	public final void insertarTrabajador(User u){
-		String cad = restaurantSelect.getValue().toString();
-		List<Restaurant> restaurant = repositoryRes.findByNameStartsWithIgnoreCase(cad);
-		u.setRestaurant(restaurant.get(0)); 
-		service.save(u);
+		boolean guardar = true;
+		String errores = "alert('No se ha podido guardar, debido a los siguientes errores:";
+		
+		if(cargoSelect.getValue()==null && u.getPosition()==""){
+			errores = errores.concat("\\n - El cargo no puede estar vacío.");
+			guardar = false;
+		}
+		
+		if(restaurantSelect.getValue()==null && u.getRestaurant().getId()==null){
+			errores = errores.concat("\\n - El restaurante no puede estar vacío.");
+			guardar = false;
+		}
+		
+		if(email.getValue() == ""){
+			errores = errores.concat("\\n - El email no debe estar vacío");
+			guardar = false;
+		}else if(!email.getValue().contains("@")){
+			errores = errores.concat("\\n - El email debe de ser de la siguiente forma: examle@example.com");
+			guardar = false;
+		}
+		
+		if(firstName.getValue() == ""){
+			errores = errores.concat("\\n - El nombre no debe estar vacío.");
+			guardar = false;
+		}
+		
+		if(lastName.getValue() == ""){
+			errores = errores.concat("\\n - El apellido no debe estar vacío.");
+			guardar = false;
+		}
+		
+		if(userName.getValue() == ""){
+			errores = errores.concat("\\n - El nombre de usuario no debe estar vacío.");
+			guardar = false;
+		}
+		
+		if(password.getValue() == ""){
+			errores = errores.concat("\\n - La contraseña no debe estar vacía.");
+			guardar = false;
+		}
+		
+		if(telephone_number.getValue() != ""){
+			try{ 
+			     int telephone = Integer.parseInt(telephone_number.getValue());
+			     if(telephone < 0){
+			    	 errores = errores.concat("\\n - El teléfono no puede ser negativo.");
+					 guardar = false;
+			     }
+			}catch(NumberFormatException e){ 
+				errores = errores.concat("\\n - El teléfono debe de ser numérico.");
+				guardar = false;
+			} 
+		}
+		
+		if(guardar){
+			if(cargoSelect.getValue()==null)
+				u.setPosition(u.getPosition());
+			else
+				u.setPosition(cargoSelect.getValue().toString());
+			
+			if(restaurantSelect.getValue()==null)
+				u.setRestaurant(u.getRestaurant());
+			else{
+				List<Restaurant> restaurant = repositoryRes.findByNameStartsWithIgnoreCase(restaurantSelect.getValue().toString());
+				u.setRestaurant(restaurant.get(0)); 
+			}
+				
+			service.save(u);
+		}else{
+			errores = errores.concat("');");
+			JavaScript.getCurrent().execute(errores);
+		}
 	}
 	
 	

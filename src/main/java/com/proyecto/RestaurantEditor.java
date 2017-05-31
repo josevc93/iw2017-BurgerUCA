@@ -20,8 +20,8 @@ public class RestaurantEditor extends VerticalLayout{
 
 	private Restaurant restaurant;
 	
-	TextField name = new TextField("Nombre");
-	TextField address = new TextField("Dirección");
+	TextField name = new TextField("Nombre (*)");
+	TextField address = new TextField("Dirección (*)");
 	
 	Button save = new Button("Guardar");
 	Button cancel = new Button("Cancelar");

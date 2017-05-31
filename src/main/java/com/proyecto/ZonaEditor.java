@@ -30,8 +30,8 @@ public class ZonaEditor extends VerticalLayout{
 
 	private Zona zona;
 	
-	TextField name = new TextField("Nombre");
-	TextField numMesas = new TextField("Numero de mesas");
+	TextField name = new TextField("Nombre (*)");
+	TextField numMesas = new TextField("Numero de mesas (*)");
 	
 	CheckBox state = new CheckBox("Estado");
 	NativeSelect<String> restaurantSelect;

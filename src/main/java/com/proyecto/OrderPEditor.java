@@ -85,7 +85,7 @@ public class OrderPEditor extends VerticalLayout{
 	
 	CheckBox takeAway = new CheckBox("Para llevar");
 	CheckBox state = new CheckBox("Finalizado");
-	TextField numMesa = new TextField("Numero de mesa");
+	TextField numMesa = new TextField("Numero de mesa (*)");
 	
 	Button save = new Button("Guardar");
 	Button cancel = new Button("Cancelar");

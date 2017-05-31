@@ -35,9 +35,9 @@ public class ProductEditor extends VerticalLayout{
 
 	private Product Product;
 	
-	TextField name = new TextField("Nombre");
-	TextField price = new TextField("Precio");
-	TextField iva = new TextField("IVA");
+	TextField name = new TextField("Nombre (*)");
+	TextField price = new TextField("Precio (*)");
+	TextField iva = new TextField("IVA (*)");
 	private final NativeSelect<String> familySelect;
 	TextField productImage = new TextField("Image");
 	
@@ -57,7 +57,7 @@ public class ProductEditor extends VerticalLayout{
 		lista.add("comidas");
 		lista.add("bebidas");
 		lista.add("postres");
-		familySelect = new NativeSelect<>("Selecciona producto", lista);
+		familySelect = new NativeSelect<>("Selecciona familia", lista);
 		
 		class ImageUploader implements Receiver, SucceededListener {
 			public File file;
