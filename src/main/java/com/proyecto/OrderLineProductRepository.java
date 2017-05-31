@@ -12,4 +12,9 @@ public interface OrderLineProductRepository extends JpaRepository<OrderLineProdu
 	//List<Product> findByNameStartsWithIgnoreCase(String name);
 	@Query("select i from OrderLineProduct i where i.orderpObj.id = :id")
 	List<OrderLineProduct> findByIdProduct(@Param("id") Long id);
+	
+	//@Query("select i from OrderLineProduct i where i.")
+//	List<OrderLineProduct> findByIdProduct(@Param("id") Long id);
+
+	//List<OrderLineProduct> findByNameStartsWithIgnoreCase(String nombre); //FALLA PQ NOMBRE NO EXISTE EN ORDERLINEPRODUCT
 }

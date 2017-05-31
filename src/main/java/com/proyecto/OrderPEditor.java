@@ -60,6 +60,8 @@ public class OrderPEditor extends VerticalLayout{
 	
 	private final MenuRepository repoM;
 	
+	private final GridTicketRepository repoGT;
+	
 	private final CustomerRepository repoC;
 	
 	private final OrderLineMenuRepository repoOLM;
@@ -78,7 +80,11 @@ public class OrderPEditor extends VerticalLayout{
 	final Grid<Customer> gridCustomer = new Grid<Customer>(Customer.class);
 	final Grid<GridTicket> gridTicket = new Grid<GridTicket>(GridTicket.class);
 	
+	private GridTicket gridTicketObj;
+	
 	private List<GridTicket> gtList = new ArrayList<GridTicket>();
+	private List<OrderLineProduct> deleteOrderLineProduct = new ArrayList<OrderLineProduct>();
+	private List<OrderLineMenu> deleteOrderLineMenu = new ArrayList<OrderLineMenu>();
 	
 	private TextField filter = new TextField();
 	VerticalLayout gridCliente = new VerticalLayout(filter, gridCustomer);
@@ -99,9 +105,9 @@ public class OrderPEditor extends VerticalLayout{
 	GridLayout postresLayout = new GridLayout();
 	GridLayout menusLayout = new GridLayout();
 	
-	
-	Button addMenu = new Button("Añadir");
-	Button addProduct = new Button("Añadir");
+	Button deleteProduct = new Button("Eliminar");
+//	Button addMenu = new Button("Añadir");
+//	Button addProduct = new Button("Añadir");
 	
 	private File file;
 	
@@ -109,7 +115,7 @@ public class OrderPEditor extends VerticalLayout{
 	
 	public OrderPEditor(OrderPRepository repository, ProductRepository repoProduct
 						, ZonaRepository repoZona, MenuRepository repoM, CustomerRepository repoC, 
-						OrderLineMenuRepository repoOLM, OrderLineProductRepository repoOLP){
+						OrderLineMenuRepository repoOLM, OrderLineProductRepository repoOLP, GridTicketRepository repogt){
 		this.repoP = repoProduct;
 		this.repository = repository;
 		this.repoZona = repoZona;
@@ -117,6 +123,7 @@ public class OrderPEditor extends VerticalLayout{
 		this.repoM = repoM;
 		this.repoOLM = repoOLM;
 		this.repoOLP = repoOLP;
+		this.repoGT = repogt;
 		
 		menusLayout.setColumns(5);
 	    comidasLayout.setColumns(5);
@@ -139,6 +146,8 @@ public class OrderPEditor extends VerticalLayout{
 		gridTicket.addColumn(ticket -> { return ticket.getNombre();}).setCaption("Nombre");
 		gridTicket.addColumn(ticket -> { return ticket.getCantidad(); }).setCaption("Cantidad");
 		gridTicket.addColumn(ticket -> { return ticket.getPrecio(); }).setCaption("Precio");
+		
+		gridTicket.asSingleSelect().addValueChangeListener(e -> { editGridTicket(e.getValue()); });
 		
 		//Lista de zonas existentes
 		List<Zona> zonasList = repoZona.findAll();
@@ -198,7 +207,7 @@ public class OrderPEditor extends VerticalLayout{
 			menusLayout.addComponent(image);
 		}
 		alimentos.addTab(menusLayout, "Menus");
-		addComponents(state, takeAway, gridCliente, numMesa, zonasSelect, gridTicket, alimentos, actions);
+		addComponents(state, takeAway, gridCliente, numMesa, zonasSelect, deleteProduct, gridTicket, alimentos, actions);
 		
 		binder.forField(numMesa)
 		  .withNullRepresentation("")
@@ -232,6 +241,7 @@ public class OrderPEditor extends VerticalLayout{
 		
 		save.addClickListener(e -> guardarPedido(orderp));
 		delete.addClickListener(e -> eliminarPedido(orderp));
+		deleteProduct.addClickListener(e -> eliminarProducto(gridTicketObj, orderp));
 		setVisible(false);
 	}
 	
@@ -254,7 +264,6 @@ public class OrderPEditor extends VerticalLayout{
 			gtList.get(pos).setPrecio(Double.parseDouble(menuList.get(0).getPrice()) * gtList.get(pos).getCantidad());
 			orderLMlist.add(new OrderLineMenu(1, Double.parseDouble(menuList.get(0).getPrice()), 
 					orderp, menuList.get(0)));
-			
     	}else{
 			gtList.add(new GridTicket(name, 1L, Double.parseDouble(menuList.get(0).getPrice()), true, "", "menu")); //MENU
 			orderLMlist.add(new OrderLineMenu(1, Double.parseDouble(menuList.get(0).getPrice()), 
@@ -263,6 +272,27 @@ public class OrderPEditor extends VerticalLayout{
 		
 		gridTicket.setItems(gtList);
 		orderp.setOrderLineMenuList(orderLMlist);
+	}
+	
+	public final void eliminarProducto(GridTicket gt, OrderP orderp){
+     	for(int i=0; i<orderp.getOrderLineProductList().size(); i++)
+     		if(orderp.getOrderLineProductList().get(i).getProductObj().getName().equals(gt.getNombre())){
+     			deleteOrderLineProduct.add(orderp.getOrderLineProductList().get(i));
+     			orderLPlist.remove(orderp.getOrderLineProductList().get(i));
+     		}
+     	
+     	for(int i=0; i<orderp.getOrderLineMenuList().size(); i++)
+     		if(orderp.getOrderLineMenuList().get(i).getMenuObj().getName().equals(gt.getNombre())){
+     			deleteOrderLineMenu.add(orderp.getOrderLineMenuList().get(i));
+     			orderLMlist.remove(orderp.getOrderLineMenuList().get(i));
+     		}
+     	
+     	List<GridTicket> gtL = new ArrayList<GridTicket>();
+     	for(int i=0; i<gtList.size(); i++)
+     		if(gtList.get(i).getNombre() != gt.getNombre())
+     			gtL.add(gtList.get(i));
+
+		gridTicket.setItems(gtL);
 	}
 	
 	public final void insertarProducto(String name, OrderP orderp){
@@ -399,6 +429,10 @@ public class OrderPEditor extends VerticalLayout{
 				p.setState(true);
 				p.setOrderLineProductList(orderLPlist);
 				repository.save(p);
+				for(OrderLineMenu item: deleteOrderLineMenu)
+					repoOLM.delete(item);
+				for(OrderLineProduct item: deleteOrderLineProduct)
+					repoOLP.delete(item);
 				for(OrderLineProduct item: orderLPlist)
 					repoOLP.save(item);
 				for(OrderLineMenu item: orderLMlist)
@@ -414,6 +448,10 @@ public class OrderPEditor extends VerticalLayout{
 				orderp.setNumMesa(Long.parseLong(numMesa.getValue()));
 				p.setOrderLineProductList(orderLPlist);
 				repository.save(p);
+				for(OrderLineMenu item: deleteOrderLineMenu)
+					repoOLM.delete(item);
+				for(OrderLineProduct item: deleteOrderLineProduct)
+					repoOLP.delete(item);
 				for(OrderLineProduct item: orderLPlist)
 					repoOLP.save(item);
 				for(OrderLineMenu item: orderLMlist)
@@ -448,11 +486,14 @@ public class OrderPEditor extends VerticalLayout{
 			orderLPlist = orderp.getOrderLineProductList();
 			orderLMlist = orderp.getOrderLineMenuList();
 			List<GridTicket> items = new ArrayList<>();
-			for(OrderLineProduct i: orderp.getOrderLineProductList())
+			for(OrderLineProduct i: orderp.getOrderLineProductList()){
 				items.add(new GridTicket(i.getProductObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true, i.getProductObj().getIva(), i.getProductObj().getFamily()));
-			for(OrderLineMenu i: orderp.getOrderLineMenuList())
+				gtList.add(new GridTicket(i.getProductObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true, i.getProductObj().getIva(), i.getProductObj().getFamily()));
+			}
+			for(OrderLineMenu i: orderp.getOrderLineMenuList()){
 				items.add(new GridTicket(i.getMenuObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true, "", "menu")); //MENU
-			
+				gtList.add(new GridTicket(i.getMenuObj().getName(), new Long(i.getCantidad()), i.getPrecio(), true, "", "menu"));
+			}
 			gridTicket.setItems(items);
 			orderp.setGridTicketList(items);
 		}
@@ -481,6 +522,13 @@ public class OrderPEditor extends VerticalLayout{
 			gridCustomer.setItems(repoC.findBytelefonoStartsWithIgnoreCase(filterText));
 		}
 	}
+	 
+	 
+	 public final void editGridTicket(GridTicket gt){
+			if(gt != null){
+					gridTicketObj = gt;
+			}
+		}
 	 
 	 public void costeTotal(List<GridTicket> gtList){
 		 double precioTotal = 0.0;
