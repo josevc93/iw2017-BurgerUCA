@@ -39,6 +39,16 @@ public class OrderPView extends VerticalLayout implements View {
 
 	private final Button addNewBtn;
 	
+	private final Button cerrarCaja;
+	
+	private VerticalLayout all;
+	
+	private OrderP cajas;
+	
+	//private final Button cierreCaja;
+	
+	private Grid<Double> gridCaja = new Grid<>(Double.class);
+	
 	@Autowired
 	public OrderPView(OrderPRepository repo, OrderPEditor editor){
 		this.repo = repo;
@@ -47,18 +57,26 @@ public class OrderPView extends VerticalLayout implements View {
 		this.grid = new Grid<>(OrderP.class);
 		this.filter = new TextField();
 		this.addNewBtn = new Button("Nuevo pedido");
+		this.cerrarCaja = new Button("Cerrar caja");
+		//this.cierreCaja = new Button("Cerrar");
 		addNewBtn.addStyleName(ValoTheme.BUTTON_PRIMARY);
+		cerrarCaja.addStyleName(ValoTheme.BUTTON_DANGER);
+		//cierreCaja.addStyleName(ValoTheme.BUTTON_DANGER);
 	}
 		
     @PostConstruct
     void init() {
-    	addComponent(new Label("Nombre del usuario: " + SecurityUtils.getUserLogin()));
-    //	addComponent(new Label("Trabaja en: " + SecurityUtils.getUserRestaurant()));
-        //addComponent(new Label("Bienvenido a la gestión de pedidos."));
-    	HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
+    	HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn, cerrarCaja);
         VerticalLayout mainLayout = new VerticalLayout(actions, grid);
-        VerticalLayout all = new VerticalLayout(mainLayout, editor);
+        all = new VerticalLayout(mainLayout, editor);
 		addComponent(all);
+		
+		HorizontalLayout cajaLayout = new HorizontalLayout(gridCaja);
+		gridCaja.setVisible(false);
+		gridCaja.setColumns();
+		gridCaja.addColumn(Integer -> { return totalPedidos(); }).setCaption("Total pedidos");
+		gridCaja.addColumn(Double -> { return Ganancias(); /*getTotalGanancias()*/}).setCaption("Total ganacias");
+		addComponent(cajaLayout);
 		
 		filter.setPlaceholder("Filtrar numero mesa");
 		filter.setValueChangeMode(ValueChangeMode.LAZY);
@@ -74,20 +92,26 @@ public class OrderPView extends VerticalLayout implements View {
 		});
 		
 		List<GridTicket> gridTicketList = new ArrayList<GridTicket>();
-		addNewBtn.addClickListener(e -> editor.editOrderP(new OrderP(false, false, 0L, 0.0, null, null, null, null, null, gridTicketList)));
+		addNewBtn.addClickListener(e -> { editor.editOrderP(new OrderP(false, false, 0L, 0.0, null, null, null, null, null, gridTicketList, true));
+		gridCaja.setVisible(false);
+    	//cierreCaja.setVisible(false); 
+    	grid.setVisible(true);});
+		
+		cerrarCaja.addClickListener(e -> listaPedidosCaja());
+		//cierreCaja.addClickListener(e -> cierrePedido());
 		
 		editor.setChangeHandler(() -> {
 			editor.setVisible(false);
 			if(filter.getValue() != "")
 				listpedidos(Long.parseLong(filter.getValue()));
-			/*else
-				listpedidos(null);*/
 		});
 
 		listpedidos(1L);
     }
 
     void listpedidos(Long num) {
+    	gridCaja.setVisible(false);
+    	//cierreCaja.setVisible(false);
 		if (num == 1) {
 			grid.setItems((Collection<OrderP>) repo.findOrdersOpen());
 		}
@@ -95,6 +119,43 @@ public class OrderPView extends VerticalLayout implements View {
 			grid.setItems(repo.findByNumMesa(num));
 		}
 	}
+    
+    void listaPedidosCaja(){
+    	grid.setVisible(false);
+    	gridCaja.setVisible(true);
+    	//cierreCaja.setVisible(true);
+    	gridCaja.setItems(1.0);
+    }
+    
+    public int totalPedidos()
+    {
+    	int total = 0;
+    	total = repo.cerrarCaja().size();
+    	
+    	return total;
+    	
+    }
+    
+    public double Ganancias()
+    {
+    	double ganancias = 0;
+    	
+    	for(int i = 0; i < repo.cerrarCaja().size(); i++){
+    		ganancias = ganancias + repo.cerrarCaja().get(i).getCoste();
+    	}
+    	
+    	return ganancias;
+    }
+    
+    public void cierrePedido()
+    {
+    	for(int i = 0; i < repo.cerrarCaja().size(); i++){
+    		repo.cerrarCaja().get(i).setCaja(false);
+    	}
+    	
+    }
+   
+    
 	@Override
     public void enter(ViewChangeEvent event) {
         // This view is constructed in the init() method()

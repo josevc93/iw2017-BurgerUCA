@@ -15,5 +15,6 @@ public interface OrderPRepository extends JpaRepository<OrderP, Long> {
 	@Query("select op from OrderP op where op.state = 0")
 	List<OrderP> findOrdersOpen();
 	
-	
+	@Query("select op from OrderP op where op.caja = 0")
+    List<OrderP> cerrarCaja();	
 }
