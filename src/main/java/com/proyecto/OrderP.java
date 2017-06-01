@@ -21,7 +21,7 @@ public class OrderP {
 
 	public OrderP(boolean state, boolean takeAway, Long numMesa, Double coste, Zona zona, User user, Customer customer,
 			List<OrderLineProduct> orderLineProductList, List<OrderLineMenu> orderLineMenuList,
-			List<GridTicket> gridTicketList) {
+			List<GridTicket> gridTicketList, boolean caja) {
 		super();
 		this.state = state;
 		this.takeAway = takeAway;
@@ -48,6 +48,8 @@ public class OrderP {
     private Long numMesa;
     
     private Double coste;
+    
+    private boolean caja;
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="zona_id")
@@ -160,6 +162,17 @@ public class OrderP {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+	
+	public boolean getCaja()
+	{
+		return caja; 
+	}
+	
+	public void setCaja(boolean caja)
+	{
+		this.caja = caja;
+		
 	}
 
 }
