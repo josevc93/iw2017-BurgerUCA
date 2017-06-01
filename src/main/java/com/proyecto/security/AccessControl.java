@@ -19,6 +19,8 @@ public class AccessControl implements ViewAccessControl {
     		return true;
     	} else if(beanName.equals("orderPView")){
     		return SecurityUtils.hasRole("Camarero");
+    	} else if(beanName.equals("customerView")){
+    		return SecurityUtils.hasRole("Camarero");
     	} else {
     		return false;
     	}
